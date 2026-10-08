@@ -133,8 +133,8 @@ Errors reallocDown(Stack_t* stk){
 
     stk->capacity /= scaleFactor;
 
-    printf("size = %lu\n", (unsigned long) stk->size);
-    printf("new capacity after reallocDown() = %lu\n", (unsigned long) stk->capacity);
+    //printf("size = %lu\n", (unsigned long) stk->size);
+    //printf("new capacity after reallocDown() = %lu\n", (unsigned long) stk->capacity);
     assert(stk->size < stk->capacity);
 
     reallocArray(stk);

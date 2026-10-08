@@ -4,6 +4,9 @@
 enum Operations{
     PUSH,
     ADD,
+    SUB,
+    DIV,
+    MUL,
     OUT,
     DEFAULT,
     ERROR
@@ -42,6 +45,15 @@ void translate(const char* file_In, const char* file_Out){
         }
         else if(strcmp(operation, "ADD") == 0){
             codeOfOperation = ADD;
+        }
+        else if(strcmp(operation, "SUB") == 0){
+            codeOfOperation = SUB;
+        }
+        else if(strcmp(operation, "MUL") == 0){
+            codeOfOperation = MUL;
+        }
+        else if(strcmp(operation, "DIV") == 0){
+            codeOfOperation = MUL;
         }
         else if(strcmp(operation, "OUT") == 0){
             codeOfOperation = OUT;

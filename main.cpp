@@ -14,7 +14,7 @@ enum ActionWithProcess{
 
 #define DUMP stackDump(LOG_FILE, &stack);
 
-void stackAdd(Stack_t* stk);
+void arithmOperation(Stack_t* stk, Operations operation);
 ActionWithProcess processOperation(const char* str, Stack_t* stack);
 
 int main(){
@@ -36,17 +36,40 @@ int main(){
             DUMP;
             break;
         }
-        
+
     }
     fclose(filePtr);
-
+    
     return 0;
 }
 
-void stackAdd(Stack_t* stk){
+void arithmOperation(Stack_t* stk, Operations operation){
+    assert(stk);
+
     int a = stackPop(stk);
     int b = stackPop(stk);
-    stackPush(stk, a + b);
+    
+    switch (operation){
+    case ADD:
+        stackPush(stk, a + b);
+        return;
+
+    case SUB:
+        stackPush(stk, b - a);
+        return;
+
+    case MUL:
+        stackPush(stk, a * b);
+        return;
+
+    case DIV:
+        assert(a != 0);
+        stackPush(stk, b / a);
+        return;
+
+    case DEFAULT:
+        return;
+    }
 }
 
 ActionWithProcess processOperation(const char* str, Stack_t* stack){
@@ -61,8 +84,21 @@ ActionWithProcess processOperation(const char* str, Stack_t* stack){
 
         switch (operation){
         case ADD:
-            stackAdd(stack);
+            arithmOperation(stack, ADD);
             return CONTINUATION;
+        
+        case SUB:
+            arithmOperation(stack, SUB);
+            return CONTINUATION; 
+        
+        case MUL:
+            arithmOperation(stack, MUL);
+            return CONTINUATION;
+        
+        case DIV:
+            arithmOperation(stack, DIV);
+            return CONTINUATION;    
+
         case OUT:
             return COMPLETION;
         default:
