@@ -24,8 +24,6 @@ void translate(const char* file_In, const char* file_Out){
     FILE* fileOut = fopen(file_Out, "w");
     assert(fileIn);
     assert(fileOut);
-    // fclose(fileOutCreate);
-    // FILE* fileOut = fopen(fileOut, "w");
     while(true){
         char str[20] = {};
         fgets(str, sizeof(str), fileIn);

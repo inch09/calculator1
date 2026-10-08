@@ -6,6 +6,7 @@
 #include <string.h>
 #include "stack.h"
 #include "translator.cpp"
+#include "disassembler.cpp"
 
 enum ActionWithProcess{
     CONTINUATION,
@@ -19,6 +20,7 @@ ActionWithProcess processOperation(const char* str, Stack_t* stack);
 
 int main(){
     translate(FILE_TO_BE_TRANSLATION, FILE_WITH_TRANSLATION_RESULT);
+    disAssembling(FILE_TO_BE_DISASSEMBLING, FILE_WITH_DISASSEMBLING_RESULT);
 
     Stack_t stack = {};
     stackInit(&stack, 10);
