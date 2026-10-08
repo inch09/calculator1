@@ -12,7 +12,7 @@ enum Operations{
     ERROR
 };
 
-#define FILE_TO_BE_TRANSLATION "command.txt"
+#define FILE_TO_BE_TRANSLATION "test1.txt"
 #define FILE_WITH_TRANSLATION_RESULT "code.txt"
 
 void deleteLastEnter(char* str);
@@ -22,21 +22,25 @@ void translate(const char* file_In, const char* file_Out);
 void translate(const char* file_In, const char* file_Out){
     FILE* fileIn = fopen(file_In, "r");
     FILE* fileOut = fopen(file_Out, "w");
+
     assert(fileIn);
     assert(fileOut);
+
     while(true){
         char str[20] = {};
         fgets(str, sizeof(str), fileIn);
         deleteLastEnter(str);
+
         char operation[5] = {};
         Operations codeOfOperation = DEFAULT;
-        int argument = 0;
+        double argument = 0;
         size_t countWord = countOfWords((const char*) str);
+
         if(countWord == 1){
             sscanf(str, "%s", operation);
         }
         else if(countWord == 2){
-            sscanf(str, "%s %d", operation, &argument);
+            sscanf(str, "%s %lf", operation, &argument);
         }
         if(strcmp(operation, "PUSH") == 0){
             codeOfOperation = PUSH;
@@ -51,17 +55,20 @@ void translate(const char* file_In, const char* file_Out){
             codeOfOperation = MUL;
         }
         else if(strcmp(operation, "DIV") == 0){
-            codeOfOperation = MUL;
+            codeOfOperation = DIV;
         }
         else if(strcmp(operation, "OUT") == 0){
             codeOfOperation = OUT;
             fprintf(fileOut, "%d", codeOfOperation);
             break;
         }
+
         fprintf(fileOut, "%d", codeOfOperation);
+
         if(countWord == 2){
-            fprintf(fileOut, " %d", argument);
+            fprintf(fileOut, " %lf", argument);
         }
+        
         fprintf(fileOut, "\n");
     }
     fclose(fileIn);

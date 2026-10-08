@@ -3,8 +3,8 @@
 #include "config.h"
 #include "stack.h"
 
-typedef int Stack_elem_t;
-#define SPECIFIER "%d"
+typedef double Stack_elem_t;
+#define SPECIFIER "%lf"
 #define LOG_FILE "stack.log"
 
 #define STACK_WITHOUT_DEBUG_MODE

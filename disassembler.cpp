@@ -26,7 +26,7 @@ void disAssembling(const char* file_In, const char* file_Out){
 
         int codeOfOperation = -10;
         const char* strOperation = "";
-        int argument = 0;
+        double argument = 0;
 
         size_t countWord = countOfWords((const char*) str);
 
@@ -34,7 +34,7 @@ void disAssembling(const char* file_In, const char* file_Out){
             sscanf(str, "%d", &codeOfOperation);
         }
         else if(countWord == 2){
-            sscanf(str, "%d %d", &codeOfOperation, &argument);
+            sscanf(str, "%d %lf", &codeOfOperation, &argument);
         }
         else{
             return;
@@ -58,7 +58,7 @@ void disAssembling(const char* file_In, const char* file_Out){
             fprintf(fileOut, "%s", strOperation);
         }
         else if(countWord == 2){
-            fprintf(fileOut, "%s %d", strOperation, argument);
+            fprintf(fileOut, "%s %lf", strOperation, argument);
         }
 
         if(codeOfOperation == OUT){

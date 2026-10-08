@@ -38,7 +38,6 @@ int main(){
             DUMP;
             break;
         }
-
     }
     fclose(filePtr);
     
@@ -48,8 +47,8 @@ int main(){
 void arithmOperation(Stack_t* stk, Operations operation){
     assert(stk);
 
-    int a = stackPop(stk);
-    int b = stackPop(stk);
+    Stack_elem_t a = stackPop(stk);
+    Stack_elem_t b = stackPop(stk);
     
     switch (operation){
     case ADD:
@@ -80,7 +79,8 @@ ActionWithProcess processOperation(const char* str, Stack_t* stack){
     assert(stack);
 
     int operation = -67;
-    int number = 0;
+    double number = 0;
+
     if(countOfWords(str) == 1){
         sscanf(str, "%d", &operation);
 
@@ -109,7 +109,7 @@ ActionWithProcess processOperation(const char* str, Stack_t* stack){
 
     }
     else if(countOfWords(str) == 2){
-        sscanf(str, "%d %d", &operation, &number);
+        sscanf(str, "%d %lf", &operation, &number);
 
         switch (operation){
             case PUSH:
