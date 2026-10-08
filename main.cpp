@@ -19,25 +19,26 @@ ActionWithProcess processOperation(const char* str, Stack_t* stack);
 
 int main(){
     translate(FILE_TO_BE_TRANSLATION, FILE_WITH_TRANSLATION_RESULT);
+
     Stack_t stack = {};
     stackInit(&stack, 10);
+
     FILE* filePtr = fopen(FILE_WITH_TRANSLATION_RESULT, "r");
+    assert(filePtr);
+
     while(true){
         char str[20] = {};
         fgets(str, sizeof(str), filePtr);
         deleteLastEnter(str);
-        //printf("%s, count of words = %lu\n", str, (unsigned long) countOfWords((const char*) str));
+
         ActionWithProcess action = processOperation((const char*) str, &stack);
         if(action == COMPLETION){
             DUMP;
             break;
         }
+        
     }
     fclose(filePtr);
-    // stackPush(&stack, 10);
-    // stackPush(&stack, 10);
-    // stackAdd(&stack);
-    // stackDump(LOG_FILE, &stack);
 
     return 0;
 }
