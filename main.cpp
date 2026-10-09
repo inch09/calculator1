@@ -80,6 +80,7 @@ ActionWithProcess processOperation(const char* str, Stack_t* stack){
 
     int operation = -67;
     double number = 0;
+    Stack_elem_t elem = 0;
 
     if(countOfWords(str) == 1){
         sscanf(str, "%d", &operation);
@@ -100,8 +101,15 @@ ActionWithProcess processOperation(const char* str, Stack_t* stack){
         case DIV:
             arithmOperation(stack, DIV);
             return CONTINUATION;    
-
+        
         case OUT:
+            elem = stackPop(stack);
+            printf(SPECIFIER, elem);
+            printf("\n");
+            stackPush(stack, elem);
+            return CONTINUATION;
+        
+        case HLT:
             return COMPLETION;
         default:
             return CONTINUATION;
@@ -189,8 +197,8 @@ ActionWithProcess processOperation(const char* str, Stack_t* stack){
     //     else if(strcmp(operation, "ADD") == 0){
     //         codeOfOperation = ADD;
     //     }
-    //     else if(strcmp(operation, "OUT") == 0){
-    //         codeOfOperation = OUT;
+    //     else if(strcmp(operation, "HLT") == 0){
+    //         codeOfOperation = HLT;
     //         fprintf(fileOut, "%d", codeOfOperation);
     //         break;
     //     }

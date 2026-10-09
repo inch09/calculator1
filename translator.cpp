@@ -8,11 +8,12 @@ enum Operations{
     DIV,
     MUL,
     OUT,
+    HLT,
     DEFAULT,
     ERROR
 };
 
-#define FILE_TO_BE_TRANSLATION "test1.txt"
+#define FILE_TO_BE_TRANSLATION "test3.txt"
 #define FILE_WITH_TRANSLATION_RESULT "code.txt"
 
 void deleteLastEnter(char* str);
@@ -59,6 +60,9 @@ void translate(const char* file_In, const char* file_Out){
         }
         else if(strcmp(operation, "OUT") == 0){
             codeOfOperation = OUT;
+        }
+        else if(strcmp(operation, "HLT") == 0){
+            codeOfOperation = HLT;
             fprintf(fileOut, "%d", codeOfOperation);
             break;
         }

@@ -48,6 +48,7 @@ void disAssembling(const char* file_In, const char* file_Out){
             GET_OPERATION(DIV);
             GET_OPERATION(MUL);
             GET_OPERATION(OUT);
+            GET_OPERATION(HLT);
             GET_OPERATION(DEFAULT);
             GET_OPERATION(ERROR);
             default:
@@ -61,7 +62,7 @@ void disAssembling(const char* file_In, const char* file_Out){
             fprintf(fileOut, "%s %lf", strOperation, argument);
         }
 
-        if(codeOfOperation == OUT){
+        if(codeOfOperation == HLT){
             return;
         }
         fprintf(fileOut, "\n");
