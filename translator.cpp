@@ -7,13 +7,15 @@ enum Operations{
     SUB,
     DIV,
     MUL,
+    SIN,
+    SQRT,
     OUT,
     HLT,
     DEFAULT,
     ERROR
 };
 
-#define FILE_TO_BE_TRANSLATION "test3.txt"
+#define FILE_TO_BE_TRANSLATION "test2.txt"
 #define FILE_WITH_TRANSLATION_RESULT "code.txt"
 
 void deleteLastEnter(char* str);
@@ -57,6 +59,12 @@ void translate(const char* file_In, const char* file_Out){
         }
         else if(strcmp(operation, "DIV") == 0){
             codeOfOperation = DIV;
+        }
+        else if(strcmp(operation, "SIN") == 0){
+            codeOfOperation = SIN;
+        }
+        else if(strcmp(operation, "SQRT") == 0){
+            codeOfOperation = SQRT;
         }
         else if(strcmp(operation, "OUT") == 0){
             codeOfOperation = OUT;

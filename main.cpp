@@ -15,7 +15,8 @@ enum ActionWithProcess{
 
 #define DUMP stackDump(LOG_FILE, &stack);
 
-void arithmOperation(Stack_t* stk, Operations operation);
+void binaryOperation(Stack_t* stk, Operations operation);
+void unaryOperation(Stack_t* stack, Operations operation);
 ActionWithProcess processOperation(const char* str, Stack_t* stack);
 
 int main(){
@@ -44,7 +45,7 @@ int main(){
     return 0;
 }
 
-void arithmOperation(Stack_t* stk, Operations operation){
+void binaryOperation(Stack_t* stk, Operations operation){
     assert(stk);
 
     Stack_elem_t a = stackPop(stk);
@@ -73,6 +74,23 @@ void arithmOperation(Stack_t* stk, Operations operation){
     }
 }
 
+void unaryOperation(Stack_t* stack, Operations operation){
+    assert(stack);
+
+    Stack_elem_t a = stackPop(stack); 
+
+    switch (operation){
+    case SIN:
+        stackPush(stack, sin(a));
+        return;
+
+    case SQRT:
+        stackPush(stack, sqrt(a));
+        return;
+    }
+
+}
+
 ActionWithProcess processOperation(const char* str, Stack_t* stack){
     
     assert(str);
@@ -87,21 +105,29 @@ ActionWithProcess processOperation(const char* str, Stack_t* stack){
 
         switch (operation){
         case ADD:
-            arithmOperation(stack, ADD);
+            binaryOperation(stack, ADD);
             return CONTINUATION;
         
         case SUB:
-            arithmOperation(stack, SUB);
+            binaryOperation(stack, SUB);
             return CONTINUATION; 
         
         case MUL:
-            arithmOperation(stack, MUL);
+            binaryOperation(stack, MUL);
             return CONTINUATION;
         
         case DIV:
-            arithmOperation(stack, DIV);
+            binaryOperation(stack, DIV);
             return CONTINUATION;    
         
+        case SIN:
+            unaryOperation(stack, SIN);
+            return CONTINUATION; 
+                
+        case SQRT:
+            unaryOperation(stack, SQRT);
+            return CONTINUATION;
+
         case OUT:
             elem = stackPop(stack);
             printf(SPECIFIER, elem);
