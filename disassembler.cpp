@@ -10,8 +10,6 @@
         strOperation = #operation;  \
         break;
 
-// void deleteLastEnter(char* str);
-// size_t countOfWords(const char* str);
 void disAssembling(const char* file_In, const char* file_Out);
 
 void disAssembling(const char* file_In, const char* file_Out){
@@ -74,19 +72,3 @@ void disAssembling(const char* file_In, const char* file_Out){
 }
 
 #undef GET_OPERATION
-
-// void deleteLastEnter(char* str){
-//     if(str[strlen(str) - 1] == '\n'){
-//         str[strlen(str)- 1] = '\0';
-//     }
-// }
-
-// size_t countOfWords(const char* str){
-//     size_t count = 1;
-//     for(size_t i = 0; i < strlen(str); i++){
-//         if(str[i] == ' '){
-//             count++;
-//         }
-//     }
-//     return count;
-// }
