@@ -1,20 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-
-enum TypeOfOperation{
-    PUSH,
-    ADD,
-    SUB,
-    DIV,
-    MUL,
-    SIN,
-    SQRT,
-    OUT,
-    HLT,
-    DEFAULT,
-    ERROR
-};
+#include "operations.h"
 
 struct Operation{
     TypeOfOperation type;
@@ -23,12 +10,13 @@ struct Operation{
 };
 
 
-#define FILE_TO_BE_TRANSLATION "test1.txt"
+#define FILE_TO_BE_TRANSLATION "test6.txt"
 #define FILE_WITH_TRANSLATION_RESULT "code.txt"
 
 void deleteLastEnter(char* str);
 size_t countOfWords(const char* str);
 size_t countOfStringsInFile(FILE* file);
+bool strIsNumber(const char* str);
 Operation* translate(const char* file_In, const char* file_Out);
 
 Operation* translate(const char* file_In, const char* file_Out){
@@ -53,6 +41,8 @@ Operation* translate(const char* file_In, const char* file_Out){
         fgets(str, sizeof(str), fileIn);
         deleteLastEnter(str);
 
+        char strArg1[15] = {}; 
+        
         char operation[5] = {};
         TypeOfOperation codeOfOperation = DEFAULT;
         double argument1 = NAN;
@@ -62,7 +52,33 @@ Operation* translate(const char* file_In, const char* file_Out){
             sscanf(str, "%s", operation);
         }
         else if(countWord == 2){
-            sscanf(str, "%s %lf", operation, &argument1);
+            sscanf(str, "%s %s", operation, strArg1);
+
+            if(!strIsNumber(strArg1)){  
+
+                char* strArgument1 = (char*) calloc(strlen(strArg1), sizeof(char));
+                assert(strArgument1); 
+
+                if(strcmp(strArgument1, "AX")){
+                    argument1 = 1;
+                }
+                else if(strcmp(strArgument1, "BX")){
+                    argument1 = 2;
+                }
+                else if(strcmp(strArgument1, "CX")){
+                    argument1 = 3;
+                }
+                else if(strcmp(strArgument1, "DX")){
+                    argument1 = 4;
+                }
+
+                free(strArgument1);
+            }
+
+            else{
+                sscanf(str, "%s %lf", operation, &argument1);
+            }
+
         }
         if(strcmp(operation, "PUSH") == 0){
             codeOfOperation = PUSH;
@@ -85,6 +101,15 @@ Operation* translate(const char* file_In, const char* file_Out){
         else if(strcmp(operation, "SQRT") == 0){
             codeOfOperation = SQRT;
         }
+        else if(strcmp(operation, "POPR") == 0){
+            codeOfOperation = POPR;
+        }
+        else if(strcmp(operation, "PSHR") == 0){
+            codeOfOperation = PSHR;
+        }
+        else if(strcmp(operation, "JMP") == 0){
+            codeOfOperation = JMP;
+        }
         else if(strcmp(operation, "OUT") == 0){
             codeOfOperation = OUT;
         }
@@ -94,6 +119,7 @@ Operation* translate(const char* file_In, const char* file_Out){
             fprintf(fileOut, "%d", codeOfOperation);
             break;
         }
+
         oper.type = codeOfOperation;
         oper.argument1 = argument1;
 
@@ -152,4 +178,27 @@ size_t countOfStringsInFile(FILE* file){
 
     rewind(file);
     return count;
+}
+
+bool strIsNumber(const char* str){
+    assert(str);
+
+    size_t ind = 0;
+    if(str[ind] == '-' /*|| str[ind] == "+"*/){
+        ind++;
+        if(strlen(str) == 1){
+            return false;
+        }
+    }
+
+    for(;ind < strlen(str); ind++){
+        if(str[ind] >= '0' && str[ind] <= '9'){
+            continue;
+        }
+        else{
+            return false;
+        }
+    }
+
+    return true;
 }

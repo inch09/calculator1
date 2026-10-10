@@ -4,24 +4,35 @@
 #include <assert.h>
 #include <stdint.h>
 #include <string.h>
+#include "operations.h"
 #include "stack.h"
 #include "translator.cpp"
 #include "disassembler.cpp"
 
+
 enum ActionWithProcess{
     CONTINUATION,
     COMPLETION
-} ;
+};
+
+struct Processor{
+    double registers[4];
+    Operation* operations;
+    int indOfOper;
+};
 
 #define DUMP stackDump(LOG_FILE, &stack);
 
+
 void binaryOperation(Stack_t* stk, TypeOfOperation operation);
 void unaryOperation(Stack_t* stack, TypeOfOperation operation);
-ActionWithProcess processOperation(const char* str, Stack_t* stack);
+ActionWithProcess processOperation(Processor* processor, Stack_t* stack);
 
 int main(){
-    translate(FILE_TO_BE_TRANSLATION, FILE_WITH_TRANSLATION_RESULT);
+    Operation* operations = translate(FILE_TO_BE_TRANSLATION, FILE_WITH_TRANSLATION_RESULT);
     disAssembling(FILE_TO_BE_DISASSEMBLING, FILE_WITH_DISASSEMBLING_RESULT);
+
+    Processor processor = {.registers = {}, .operations = operations, .indOfOper = 0};
 
     Stack_t stack = {};
     stackInit(&stack, 10);
@@ -29,17 +40,22 @@ int main(){
     FILE* filePtr = fopen(FILE_WITH_TRANSLATION_RESULT, "r");
     assert(filePtr);
 
-    while(true){
-        char str[20] = {};
-        fgets(str, sizeof(str), filePtr);
-        deleteLastEnter(str);
+    // while(true){
+    //     char str[20] = {};
+    //     fgets(str, sizeof(str), filePtr);
+    //     deleteLastEnter(str);
 
-        ActionWithProcess action = processOperation((const char*) str, &stack);
+    //int indOfOper = 0;
+    while(true){
+        ActionWithProcess action = processOperation(&processor, &stack);
         if(action == COMPLETION){
             DUMP;
             break;
         }
-    }
+        processor.indOfOper++;
+    }    
+
+    free(operations);
     fclose(filePtr);
     
     return 0;
@@ -91,19 +107,19 @@ void unaryOperation(Stack_t* stack, TypeOfOperation operation){
 
 }
 
-ActionWithProcess processOperation(const char* str, Stack_t* stack){
+ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
     
-    assert(str);
     assert(stack);
+    assert(processor);
 
-    int operation = -67;
-    double number = 0;
+    Operation oper = processor->operations[processor->indOfOper];
+
+    int typeOfOperation = oper.type;
     Stack_elem_t elem = 0;
 
-    if(countOfWords(str) == 1){
-        sscanf(str, "%d", &operation);
+    if(isnan(oper.argument1) && isnan(oper.argument2)){
 
-        switch (operation){
+        switch (typeOfOperation){
         case ADD:
             binaryOperation(stack, ADD);
             return CONTINUATION;
@@ -128,6 +144,44 @@ ActionWithProcess processOperation(const char* str, Stack_t* stack){
             unaryOperation(stack, SQRT);
             return CONTINUATION;
 
+        case POPR:
+            if(isEqual(oper.argument1, 1)){
+                processor->registers[0] = stackPop(stack);
+            }
+
+            if(isEqual(oper.argument1, 2)){
+                processor->registers[1] = stackPop(stack);
+            }
+
+            if(isEqual(oper.argument1, 3)){
+                processor->registers[2] = stackPop(stack);
+            }
+
+            if(isEqual(oper.argument1, 4)){
+                processor->registers[3] = stackPop(stack);
+            }
+            return CONTINUATION;    
+        
+        case PSHR:
+
+           if(isEqual(oper.argument1, 1)){
+                stackPush(stack, processor->registers[0]);
+            }
+
+            if(isEqual(oper.argument1, 2)){
+                stackPush(stack, processor->registers[1]);
+            }
+
+            if(isEqual(oper.argument1, 3)){
+                stackPush(stack, processor->registers[2]);
+            }
+
+            if(isEqual(oper.argument1, 4)){
+                stackPush(stack, processor->registers[3]);
+            }
+
+            return CONTINUATION; 
+
         case OUT:
             elem = stackPop(stack);
             printf(SPECIFIER, elem);
@@ -142,12 +196,14 @@ ActionWithProcess processOperation(const char* str, Stack_t* stack){
         }
 
     }
-    else if(countOfWords(str) == 2){
-        sscanf(str, "%d %lf", &operation, &number);
+    else if(!isnan(oper.argument1) && isnan(oper.argument2)){
 
-        switch (operation){
+        switch (typeOfOperation){
             case PUSH:
-                stackPush(stack, number);
+                stackPush(stack, oper.argument1);
+                return CONTINUATION;
+            case JMP:
+                processor->indOfOper = (int) oper.argument1;
                 return CONTINUATION;
             default:
                 return CONTINUATION;      
@@ -155,5 +211,6 @@ ActionWithProcess processOperation(const char* str, Stack_t* stack){
     }
     return COMPLETION;
 }
+
 
 

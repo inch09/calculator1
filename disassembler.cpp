@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include "operations.h"
 
 #define CONVERT_TO_STR(x) #x
 #define FILE_TO_BE_DISASSEMBLING "code.txt"
@@ -47,6 +48,9 @@ void disAssembling(const char* file_In, const char* file_Out){
             GET_OPERATION(MUL);
             GET_OPERATION(SIN);
             GET_OPERATION(SQRT);
+            GET_OPERATION(POPR);
+            GET_OPERATION(PSHR);
+            GET_OPERATION(JMP);
             GET_OPERATION(OUT);
             GET_OPERATION(HLT);
             GET_OPERATION(DEFAULT);
@@ -59,7 +63,24 @@ void disAssembling(const char* file_In, const char* file_Out){
             fprintf(fileOut, "%s", strOperation);
         }
         else if(countWord == 2){
-            fprintf(fileOut, "%s %lf", strOperation, argument);
+            if(codeOfOperation == PSHR || codeOfOperation == POPR){
+                fprintf(fileOut, "%s ", strOperation);
+                if(isEqual(argument, 1)){
+                    fprintf(fileOut, "AX");
+                }
+                else if(isEqual(argument, 2)){
+                    fprintf(fileOut, "BX");
+                }
+                else if(isEqual(argument, 3)){
+                    fprintf(fileOut, "CX");
+                }
+                else if(isEqual(argument, 4)){
+                    fprintf(fileOut, "DX");
+                }
+            }
+            else{
+                fprintf(fileOut, "%s %lf", strOperation, argument);
+            }
         }
 
         if(codeOfOperation == HLT){
