@@ -1,0 +1,4 @@
+PUSH 1
+OUT
+JMP 1
+HLT

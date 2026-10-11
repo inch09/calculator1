@@ -51,6 +51,12 @@ void disAssembling(const char* file_In, const char* file_Out){
             GET_OPERATION(POPR);
             GET_OPERATION(PSHR);
             GET_OPERATION(JMP);
+            GET_OPERATION(JA);
+            GET_OPERATION(JAE);
+            GET_OPERATION(JB);
+            GET_OPERATION(JBE);
+            GET_OPERATION(JE);
+            GET_OPERATION(JNE);
             GET_OPERATION(OUT);
             GET_OPERATION(HLT);
             GET_OPERATION(DEFAULT);

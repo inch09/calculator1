@@ -10,7 +10,7 @@ struct Operation{
 };
 
 
-#define FILE_TO_BE_TRANSLATION "test6.txt"
+#define FILE_TO_BE_TRANSLATION "test7.txt"
 #define FILE_WITH_TRANSLATION_RESULT "code.txt"
 
 void deleteLastEnter(char* str);
@@ -18,6 +18,7 @@ size_t countOfWords(const char* str);
 size_t countOfStringsInFile(FILE* file);
 bool strIsNumber(const char* str);
 Operation* translate(const char* file_In, const char* file_Out);
+void strCpyWithSameLength(char* strCopyTo, char* strCopyFrom);
 
 Operation* translate(const char* file_In, const char* file_Out){
     FILE* fileIn = fopen(file_In, "r");
@@ -56,22 +57,26 @@ Operation* translate(const char* file_In, const char* file_Out){
 
             if(!strIsNumber(strArg1)){  
 
-                char* strArgument1 = (char*) calloc(strlen(strArg1), sizeof(char));
+                char* strArgument1 = (char*) calloc(strlen(strArg1) + 1, sizeof(char));
                 assert(strArgument1); 
-
-                if(strcmp(strArgument1, "AX")){
+                strCpyWithSameLength(strArgument1, strArg1);
+                //printf("str arg1 = %s, strlen1 = %d\n", strArgument1, strlen(strArgument1));
+                if(strcmp(strArgument1, "AX") == 0){
+                    printf("67");
                     argument1 = 1;
                 }
-                else if(strcmp(strArgument1, "BX")){
+                else if(strcmp(strArgument1, "BX") == 0){
                     argument1 = 2;
                 }
-                else if(strcmp(strArgument1, "CX")){
+                else if(strcmp(strArgument1, "CX") == 0){
                     argument1 = 3;
                 }
-                else if(strcmp(strArgument1, "DX")){
+                else if(strcmp(strArgument1, "DX") == 0){
                     argument1 = 4;
                 }
-
+                // if(strcmp(operation, "POPR")==0 || strcmp(operation, "PSHR") == 0){
+                // printf("%s", operation);
+                // }
                 free(strArgument1);
             }
 
@@ -102,6 +107,8 @@ Operation* translate(const char* file_In, const char* file_Out){
             codeOfOperation = SQRT;
         }
         else if(strcmp(operation, "POPR") == 0){
+            // printf("POPR");
+            // printf("%lf", argument1);
             codeOfOperation = POPR;
         }
         else if(strcmp(operation, "PSHR") == 0){
@@ -109,6 +116,24 @@ Operation* translate(const char* file_In, const char* file_Out){
         }
         else if(strcmp(operation, "JMP") == 0){
             codeOfOperation = JMP;
+        }
+        else if(strcmp(operation, "JA") == 0){
+            codeOfOperation = JA;
+        }
+        else if(strcmp(operation, "JAE") == 0){
+            codeOfOperation = JAE;
+        }
+        else if(strcmp(operation, "JB") == 0){
+            codeOfOperation = JB;
+        }
+        else if(strcmp(operation, "JBE") == 0){
+            codeOfOperation = JBE;
+        }
+        else if(strcmp(operation, "JE") == 0){
+            codeOfOperation = JE;
+        }
+        else if(strcmp(operation, "JNE") == 0){
+            codeOfOperation = JNE;
         }
         else if(strcmp(operation, "OUT") == 0){
             codeOfOperation = OUT;
@@ -201,4 +226,11 @@ bool strIsNumber(const char* str){
     }
 
     return true;
+}
+
+void strCpyWithSameLength(char* strCopyTo, char* strCopyFrom){
+    for(size_t i = 0; i < strlen(strCopyFrom); i++){
+        strCopyTo[i] = strCopyFrom[i];
+    }
+    assert(strlen(strCopyFrom) == strlen(strCopyTo));
 }

@@ -12,7 +12,8 @@
 
 enum ActionWithProcess{
     CONTINUATION,
-    COMPLETION
+    COMPLETION,
+    JUMP
 };
 
 struct Processor{
@@ -48,11 +49,15 @@ int main(){
     //int indOfOper = 0;
     while(true){
         ActionWithProcess action = processOperation(&processor, &stack);
+        // DUMP;
+        // getchar();
         if(action == COMPLETION){
             DUMP;
             break;
         }
-        processor.indOfOper++;
+        if(action != JUMP){
+            processor.indOfOper++;
+        }
     }    
 
     free(operations);
@@ -144,44 +149,6 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
             unaryOperation(stack, SQRT);
             return CONTINUATION;
 
-        case POPR:
-            if(isEqual(oper.argument1, 1)){
-                processor->registers[0] = stackPop(stack);
-            }
-
-            if(isEqual(oper.argument1, 2)){
-                processor->registers[1] = stackPop(stack);
-            }
-
-            if(isEqual(oper.argument1, 3)){
-                processor->registers[2] = stackPop(stack);
-            }
-
-            if(isEqual(oper.argument1, 4)){
-                processor->registers[3] = stackPop(stack);
-            }
-            return CONTINUATION;    
-        
-        case PSHR:
-
-           if(isEqual(oper.argument1, 1)){
-                stackPush(stack, processor->registers[0]);
-            }
-
-            if(isEqual(oper.argument1, 2)){
-                stackPush(stack, processor->registers[1]);
-            }
-
-            if(isEqual(oper.argument1, 3)){
-                stackPush(stack, processor->registers[2]);
-            }
-
-            if(isEqual(oper.argument1, 4)){
-                stackPush(stack, processor->registers[3]);
-            }
-
-            return CONTINUATION; 
-
         case OUT:
             elem = stackPop(stack);
             printf(SPECIFIER, elem);
@@ -197,14 +164,114 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
 
     }
     else if(!isnan(oper.argument1) && isnan(oper.argument2)){
-
+        double a = NAN;
+        double b = NAN;
         switch (typeOfOperation){
             case PUSH:
                 stackPush(stack, oper.argument1);
                 return CONTINUATION;
+        
+            case POPR:
+                printf("popr, arg = %lg\n", oper.argument1);
+                if(isEqual(oper.argument1, 1)){
+                    processor->registers[0] = stackPop(stack);
+                }
+
+                if(isEqual(oper.argument1, 2)){
+                    processor->registers[1] = stackPop(stack);
+                }
+
+                if(isEqual(oper.argument1, 3)){
+                    processor->registers[2] = stackPop(stack);
+                }
+
+                if(isEqual(oper.argument1, 4)){
+                    processor->registers[3] = stackPop(stack);
+                }
+                return CONTINUATION;    
+            
+            case PSHR:
+
+            if(isEqual(oper.argument1, 1)){
+                    stackPush(stack, processor->registers[0]);
+                }
+
+                if(isEqual(oper.argument1, 2)){
+                    stackPush(stack, processor->registers[1]);
+                }
+
+                if(isEqual(oper.argument1, 3)){
+                    stackPush(stack, processor->registers[2]);
+                }
+
+                if(isEqual(oper.argument1, 4)){
+                    stackPush(stack, processor->registers[3]);
+                }
+                return CONTINUATION; 
+
             case JMP:
                 processor->indOfOper = (int) oper.argument1;
-                return CONTINUATION;
+                return JUMP;
+            case JA:
+                a = stackPop(stack);
+                b = stackPop(stack);
+                if(a < b){
+                    processor->indOfOper = (int) oper.argument1;
+                    return JUMP;
+                }
+                else{
+                    return CONTINUATION;
+                }
+            case JAE:
+                a = stackPop(stack);
+                b = stackPop(stack);
+                if(a < b || isEqual(a, b)){
+                    processor->indOfOper = (int) oper.argument1;
+                    return JUMP;
+                }
+                else{
+                    return CONTINUATION;
+                }
+            case JB:
+                a = stackPop(stack);
+                b = stackPop(stack);
+                if(a > b){
+                    processor->indOfOper = (int) oper.argument1;
+                    return JUMP;
+                }
+                else{
+                    return CONTINUATION;
+                }
+            case JBE:
+                a = stackPop(stack);
+                b = stackPop(stack);
+                if(a > b || isEqual(a, b)){
+                    processor->indOfOper = (int) oper.argument1;
+                    return JUMP;
+                }
+                else{
+                    return CONTINUATION;
+                }
+            case JE:
+                a = stackPop(stack);
+                b = stackPop(stack);
+                if(isEqual(a, b)){
+                    processor->indOfOper = (int) oper.argument1;
+                    return JUMP;
+                }
+                else{
+                    return CONTINUATION;
+                }
+            case JNE:
+                a = stackPop(stack);
+                b = stackPop(stack);
+                if(!isEqual(a, b)){
+                    processor->indOfOper = (int) oper.argument1;
+                    return JUMP;
+                }
+                else{
+                    return CONTINUATION;
+                }             
             default:
                 return CONTINUATION;      
         }
