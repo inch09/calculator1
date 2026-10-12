@@ -10,7 +10,7 @@ struct Operation{
 };
 
 
-#define FILE_TO_BE_TRANSLATION "test7.txt"
+#define FILE_TO_BE_TRANSLATION "test9.txt"
 #define FILE_WITH_TRANSLATION_RESULT "code.txt"
 
 void deleteLastEnter(char* str);

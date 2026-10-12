@@ -172,7 +172,6 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
                 return CONTINUATION;
         
             case POPR:
-                printf("popr, arg = %lg\n", oper.argument1);
                 if(isEqual(oper.argument1, 1)){
                     processor->registers[0] = stackPop(stack);
                 }
