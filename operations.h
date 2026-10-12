@@ -19,6 +19,7 @@ enum TypeOfOperation{
     JBE,
     JE,
     JNE,
+    TAG,
     OUT,
     HLT,
     DEFAULT,

@@ -19,6 +19,7 @@ size_t countOfStringsInFile(FILE* file);
 bool strIsNumber(const char* str);
 Operation* translate(const char* file_In, const char* file_Out);
 void strCpyWithSameLength(char* strCopyTo, char* strCopyFrom);
+int getNumOfTag(const char* operationWithTag);
 
 Operation* translate(const char* file_In, const char* file_Out){
     FILE* fileIn = fopen(file_In, "r");
@@ -144,13 +145,19 @@ Operation* translate(const char* file_In, const char* file_Out){
             fprintf(fileOut, "%d", codeOfOperation);
             break;
         }
+        else if(operation[0] == ':'){
+            //printf("oper = %s\n", operation);
+            codeOfOperation = TAG;
+            //printf("getN = %d\n", getNumOfTag(operation));
+            argument1 = getNumOfTag(operation);        
+        }
 
         oper.type = codeOfOperation;
         oper.argument1 = argument1;
 
         fprintf(fileOut, "%d", codeOfOperation);
 
-        if(countWord == 2){
+        if(countWord == 2 || codeOfOperation == TAG){
             fprintf(fileOut, " %lf", argument1);
         }
         
@@ -233,4 +240,23 @@ void strCpyWithSameLength(char* strCopyTo, char* strCopyFrom){
         strCopyTo[i] = strCopyFrom[i];
     }
     assert(strlen(strCopyFrom) == strlen(strCopyTo));
+}
+
+int getNumOfTag(const char* operationWithTag){
+    int numOfTag = -1;
+    //printf("%d, %s\n", strlen(operationWithTag) ,operationWithTag);
+    char* strNumOfTag = (char*) calloc(strlen(operationWithTag), sizeof(char));
+    //printf("strlen  = %d\n", strlen(strNumOfTag));
+    assert(strNumOfTag);
+    for(size_t i = 0; i < strlen(operationWithTag) - 1; i++){
+        //printf("uraaa\n");
+        assert(i + 1 < strlen(operationWithTag));
+        assert(operationWithTag[i + 1] >= '0' && operationWithTag[i + 1] <= '9');
+        strNumOfTag[i] = operationWithTag[i + 1];
+    }
+    int c = sscanf(strNumOfTag, "%d", &numOfTag);
+    free(strNumOfTag);
+    assert(c);
+    //printf("numoftg = %d\n", numOfTag);
+    return numOfTag;
 }

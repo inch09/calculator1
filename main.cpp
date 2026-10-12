@@ -20,6 +20,7 @@ struct Processor{
     double registers[4];
     Operation* operations;
     int indOfOper;
+    int tags[20];
 };
 
 #define DUMP stackDump(LOG_FILE, &stack);
