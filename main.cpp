@@ -25,6 +25,7 @@ struct Processor{
 
 #define DUMP stackDump(LOG_FILE, &stack);
 
+void processorInit(Processor* processor, Operation* operations);
 
 void binaryOperation(Stack_t* stk, TypeOfOperation operation);
 void unaryOperation(Stack_t* stack, TypeOfOperation operation);
@@ -32,9 +33,11 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack);
 
 int main(){
     Operation* operations = translate(FILE_TO_BE_TRANSLATION, FILE_WITH_TRANSLATION_RESULT);
+    assert(operations);
     disAssembling(FILE_TO_BE_DISASSEMBLING, FILE_WITH_DISASSEMBLING_RESULT);
 
-    Processor processor = {.registers = {}, .operations = operations, .indOfOper = 0};
+    Processor processor = {};
+    processorInit(&processor, operations);
 
     Stack_t stack = {};
     stackInit(&stack, 10);
@@ -48,6 +51,20 @@ int main(){
     //     deleteLastEnter(str);
 
     //int indOfOper = 0;
+    while(true){
+        ActionWithProcess action = processOperation(&processor, &stack);
+        // DUMP;
+        // getchar();
+        if(action == COMPLETION){
+            DUMP;
+            processor.indOfOper = 0;
+            break;
+        }
+        if(action != JUMP){
+            processor.indOfOper++;
+        }
+    }
+    
     while(true){
         ActionWithProcess action = processOperation(&processor, &stack);
         // DUMP;
@@ -210,13 +227,13 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
                 return CONTINUATION; 
 
             case JMP:
-                processor->indOfOper = (int) oper.argument1;
+                processor->indOfOper = processor->tags[(int) oper.argument1 - 1];
                 return JUMP;
             case JA:
                 a = stackPop(stack);
                 b = stackPop(stack);
                 if(a < b){
-                    processor->indOfOper = (int) oper.argument1;
+                    processor->indOfOper = processor->tags[(int) oper.argument1 - 1];
                     return JUMP;
                 }
                 else{
@@ -226,7 +243,7 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
                 a = stackPop(stack);
                 b = stackPop(stack);
                 if(a < b || isEqual(a, b)){
-                    processor->indOfOper = (int) oper.argument1;
+                    processor->indOfOper = processor->tags[(int) oper.argument1 - 1];
                     return JUMP;
                 }
                 else{
@@ -236,7 +253,7 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
                 a = stackPop(stack);
                 b = stackPop(stack);
                 if(a > b){
-                    processor->indOfOper = (int) oper.argument1;
+                    processor->indOfOper = processor->tags[(int) oper.argument1 - 1];
                     return JUMP;
                 }
                 else{
@@ -246,7 +263,7 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
                 a = stackPop(stack);
                 b = stackPop(stack);
                 if(a > b || isEqual(a, b)){
-                    processor->indOfOper = (int) oper.argument1;
+                    processor->indOfOper = processor->tags[(int) oper.argument1 - 1];
                     return JUMP;
                 }
                 else{
@@ -256,7 +273,7 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
                 a = stackPop(stack);
                 b = stackPop(stack);
                 if(isEqual(a, b)){
-                    processor->indOfOper = (int) oper.argument1;
+                    processor->indOfOper = processor->tags[(int) oper.argument1 - 1];
                     return JUMP;
                 }
                 else{
@@ -266,12 +283,16 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
                 a = stackPop(stack);
                 b = stackPop(stack);
                 if(!isEqual(a, b)){
-                    processor->indOfOper = (int) oper.argument1;
+                    processor->indOfOper = processor->tags[(int) oper.argument1 - 1];
                     return JUMP;
                 }
                 else{
                     return CONTINUATION;
-                }             
+                }
+            case TAG:{
+                processor->tags[((int) oper.argument1) - 1] = processor->indOfOper + 1;
+                return CONTINUATION;
+            }             
             default:
                 return CONTINUATION;      
         }
@@ -279,5 +300,17 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
     return COMPLETION;
 }
 
+void processorInit(Processor* processor, Operation* operations){
+    assert(processor);
+    assert(operations);
+    for(int i = 0; i < 4; i++){
+        processor->registers[i] = 0;
+    }
+    processor->operations = operations;
+    processor->indOfOper = 0;
+    for(int i = 0; i < 20; i++){
+        processor->tags[i] = -1;
+    }
+}
 
 
