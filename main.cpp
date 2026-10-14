@@ -12,6 +12,7 @@
 #define FILE_WITH_CODE "code.txt"
 
 enum ActionWithProcess{
+    DEFAULT_ACT,
     CONTINUATION,
     COMPLETION,
     JUMP
@@ -35,6 +36,8 @@ void binaryOperation(Stack_t* stk, TypeOfOperation operation);
 void unaryOperation(Stack_t* stack, TypeOfOperation operation);
 ActionWithProcess processOperation(Processor* processor, Stack_t* stack);
 
+
+ActionWithProcess processJump(int typeOfOperation, Stack_t* stack, Processor* processor);
 void processPshr(Operation* oper, Processor* processor, Stack_t* stack);
 void processPopr(Operation* oper, Processor* processor, Stack_t* stack);
 
@@ -147,6 +150,13 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
     int typeOfOperation = processor->code[processor->indOfOper];
     Stack_elem_t elem = 0;
 
+        ActionWithProcess act = processJump(typeOfOperation, stack, processor);
+        if(act == DEFAULT_ACT){
+        }
+        else{
+            return act;
+        }
+
         switch (typeOfOperation){
 
         processBinOp(ADD);
@@ -171,69 +181,6 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
             processPshr(processor->code[indOfOper + 1], processor, stack);
             return CONTINUATION; 
 
-        case JMP:
-            processor->indOfOper = processor->tags[processor->code[indOfOper + 1] - 1];
-            return JUMP;
-        case JA:
-            a = stackPop(stack);
-            b = stackPop(stack);
-            if(a < b){
-                processor->indOfOper = processor->tags[processor->code[indOfOper + 1] - 1];
-                return JUMP;
-            }
-            else{
-                return CONTINUATION;
-            }
-        case JAE:
-            a = stackPop(stack);
-            b = stackPop(stack);
-            if(a < b || isEqual(a, b)){
-                processor->indOfOper = processor->tags[processor->code[indOfOper + 1] - 1];
-                return JUMP;
-            }
-            else{
-                return CONTINUATION;
-            }
-        case JB:
-            a = stackPop(stack);
-            b = stackPop(stack);
-            if(a > b){
-                processor->indOfOper = processor->tags[processor->code[indOfOper + 1] - 1];
-                return JUMP;
-            }
-            else{
-                return CONTINUATION;
-            }
-        case JBE:
-            a = stackPop(stack);
-            b = stackPop(stack);
-            if(a > b || isEqual(a, b)){
-                processor->indOfOper = processor->tags[processor->code[indOfOper + 1] - 1];
-                return JUMP;
-            }
-            else{
-                return CONTINUATION;
-            }
-        case JE:
-            a = stackPop(stack);
-            b = stackPop(stack);
-            if(isEqual(a, b)){
-                processor->indOfOper = processor->tags[processor->code[indOfOper + 1] - 1];
-                return JUMP;
-            }
-            else{
-                return CONTINUATION;
-            }
-        case JNE:
-            a = stackPop(stack);
-            b = stackPop(stack);
-            if(!isEqual(a, b)){
-                processor->indOfOper = processor->tags[processor->code[indOfOper + 1] - 1];
-                return JUMP;
-            }
-            else{
-                return CONTINUATION;
-            }
         case TAG:{
             processor->tags[processor->code[indOfOper + 1] - 1] = processor->indOfOper + 1;
             return CONTINUATION;
@@ -361,4 +308,65 @@ void deleteLastEnter(char* str){
     if(str[strlen(str) - 1] == '\n'){
         str[strlen(str)- 1] = '\0';
     }
+}
+
+ActionWithProcess processJump(int typeOfOperation, Stack_t* stack, Processor* processor){
+
+    assert(stack);
+    assert(processor);
+
+    bool cont = false;
+    bool jmp = false;
+
+    if(typeOfOperation != JMP && typeOfOperation != JA &&  typeOfOperation != JAE &&
+       typeOfOperation != JB  && typeOfOperation != JBE && typeOfOperation != JE &&
+       typeOfOperation != JNE) return DEFAULT_ACT;
+
+    int a = stackPop(stack);
+    int b = stackPop(stack);
+
+    switch(typeOfOperation){
+    case JMP:
+        jmp = true;
+        break;
+
+    case JA:
+        if(a < b) jmp = true;
+        else cont = true;
+        break;
+
+    case JAE:
+        if(a < b || isEqual(a, b)) jmp = true;
+        else cont = true;
+        break;
+
+    case JB:
+        if(a > b) jmp = true;
+        else cont = true;
+        break;
+
+    case JBE:
+        if(a > b || isEqual(a, b)) jmp = true;
+        else cont = true;
+        break;
+
+    case JE:
+        if(isEqual(a, b)) jmp = true;
+        else cont = true;
+        break;
+
+    case JNE:
+        if(!isEqual(a, b)) jmp = true;
+        else cont = true;
+        break;
+    }
+    
+    if(jmp == true){
+        processor->indOfOper = processor->tags[processor->code[indOfOper + 1] - 1];
+        return JUMP;
+    }
+    if(cont == true){
+        return CONTINUATION;
+    }
+    return DEFAULT_ACT;
 }
