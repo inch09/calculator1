@@ -5,12 +5,6 @@
 #include <math.h>
 #include "operations.h"
 
-struct Operation{
-    TypeOfOperation type;
-    double argument1;
-    double argument2;
-};
-
 
 #define FILE_TO_BE_TRANSLATION "test9.txt"
 #define FILE_WITH_TRANSLATION_RESULT "code.txt"
@@ -19,7 +13,6 @@ void deleteLastEnter(char* str);
 size_t countOfWords(const char* str);
 size_t countOfStringsInFile(FILE* file);
 bool strIsNumber(const char* str);
-Operation* translate(const char* file_In, const char* file_Out);
 void strCpyWithSameLength(char* strCopyTo, char* strCopyFrom);
 int getNumOfTag(const char* operationWithTag);
 
@@ -27,19 +20,11 @@ int main(){
     FILE* fileIn = fopen(FILE_TO_BE_TRANSLATION, "r");
     FILE* fileOut = fopen(FILE_WITH_TRANSLATION_RESULT, "w");
 
-
     assert(fileIn);
     assert(fileOut);
 
-    size_t countOper = countOfStringsInFile(fileIn);
-    Operation* arrOfOperations = (Operation*) calloc(countOper, sizeof(Operation));
-    assert(arrOfOperations);
-    size_t indOfOper = 0;
-
     while(true){
 
-
-        Operation oper = {.type = DEFAULT, .argument1 = NAN, .argument2 = NAN};
 
         char str[20] = {};
         fgets(str, sizeof(str), fileIn);
@@ -49,7 +34,7 @@ int main(){
         
         char operation[5] = {};
         TypeOfOperation codeOfOperation = DEFAULT;
-        double argument1 = NAN;
+        int argument1 = 0;
         size_t countWord = countOfWords((const char*) str);
 
         if(countWord == 1){
@@ -83,7 +68,7 @@ int main(){
             }
 
             else{
-                sscanf(str, "%s %lf", operation, &argument1);
+                sscanf(str, "%s %d", operation, &argument1);
             }
 
         }
@@ -142,7 +127,6 @@ int main(){
         }
         else if(strcmp(operation, "HLT") == 0){
             codeOfOperation = HLT;
-            oper.type = HLT;
             fprintf(fileOut, "%d", codeOfOperation);
             break;
         }
@@ -153,24 +137,15 @@ int main(){
             argument1 = getNumOfTag(operation);        
         }
 
-        oper.type = codeOfOperation;
-        oper.argument1 = argument1;
 
         fprintf(fileOut, "%d", codeOfOperation);
 
         if(countWord == 2 || codeOfOperation == TAG){
-            fprintf(fileOut, " %lf", argument1);
+            fprintf(fileOut, " %d", argument1);
         }
         
         fprintf(fileOut, "\n");
 
-        if(indOfOper < countOper){
-            arrOfOperations[indOfOper] = oper;
-            indOfOper++;
-            //printf("%lu\n", (unsigned long) indOfOper);
-            // printf("%lu\n", (unsigned long) countOper);
-
-        }
     }
     fclose(fileIn);
     fclose(fileOut);

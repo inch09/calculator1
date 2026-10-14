@@ -6,8 +6,6 @@
 #include <string.h>
 #include "operations.h"
 #include "stack.h"
-#include "translator.cpp"
-#include "disassembler.cpp"
 
 #define FILE_WITH_CODE "code.txt"
 
@@ -20,7 +18,6 @@ enum ActionWithProcess{
 
 struct Processor{
     double registers[4];
-    Operation* operations;
     int* code;
     size_t countOfCommands;
     int indOfOper;
@@ -29,7 +26,7 @@ struct Processor{
 
 #define DUMP stackDump(LOG_FILE, &stack);
 
-void processorInit(Processor* processor, Operation* operations);
+void processorInit(Processor* processor);
 int fillCodeArr(Processor* processor, const char* fileWithCode);
 
 void binaryOperation(Stack_t* stk, TypeOfOperation operation);
@@ -38,8 +35,8 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack);
 
 
 ActionWithProcess processJump(int typeOfOperation, Stack_t* stack, Processor* processor);
-void processPshr(Operation* oper, Processor* processor, Stack_t* stack);
-void processPopr(Operation* oper, Processor* processor, Stack_t* stack);
+void processPshr(int argument, Processor* processor, Stack_t* stack);
+void processPopr(int argument, Processor* processor, Stack_t* stack);
 
 void deleteLastEnter(char* str);
 
@@ -49,7 +46,7 @@ int main(){
     // disAssembling(FILE_TO_BE_DISASSEMBLING, FILE_WITH_DISASSEMBLING_RESULT);
 
     Processor processor = {};
-    processorInit(&processor, operations);
+    processorInit(&processor);
     fillCodeArr(&processor, FILE_WITH_CODE);
 
     Stack_t stack = {};
@@ -73,7 +70,6 @@ int main(){
     }
     
     free(processor.code);
-    free(operations);
     fclose(filePtr);
     
     return 0;
@@ -144,8 +140,6 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
     assert(stack);
     assert(processor);
 
-    int a = 0;
-    int b = 0;
 
     int typeOfOperation = processor->code[processor->indOfOper];
     Stack_elem_t elem = 0;
@@ -168,21 +162,21 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
         processUnOp(SQRT);
 
         case PUSH:
-            stackPush(stack, processor->code[indOfOper + 1]);
+            stackPush(stack, processor->code[processor->indOfOper + 1]);
             return CONTINUATION;
     
         case POPR:
             
-            processPopr(processor->code[indOfOper + 1], processor, stack);
+            processPopr(processor->code[processor->indOfOper + 1], processor, stack);
             return CONTINUATION;    
         
         case PSHR:
             
-            processPshr(processor->code[indOfOper + 1], processor, stack);
+            processPshr(processor->code[processor->indOfOper + 1], processor, stack);
             return CONTINUATION; 
 
         case TAG:{
-            processor->tags[processor->code[indOfOper + 1] - 1] = processor->indOfOper + 1;
+            processor->tags[processor->code[processor->indOfOper + 1] - 1] = processor->indOfOper + 1;
             return CONTINUATION;
         }
 
@@ -204,17 +198,16 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
 #undef processBinOp
 #undef processUnOp
 
-void processorInit(Processor* processor, Operation* operations){
+void processorInit(Processor* processor){
     assert(processor);
-    assert(operations);
+
     for(size_t i = 0; i < 4; i++){
         processor->registers[i] = 0;
     }
 
-    processor->operations = operations;
     processor->indOfOper = 0;
 
-    processor->code = (int*) calloc(200, sizeof(code[0]));
+    processor->code = (int*) calloc(200, sizeof(processor->code[0]));
     assert(processor->code);
     processor->countOfCommands = 0;
     
@@ -224,7 +217,6 @@ void processorInit(Processor* processor, Operation* operations){
 }
 
 void processPshr(int argument, Processor* processor, Stack_t* stack){
-    assert(oper);
     assert(processor);
     assert(stack);
 
@@ -282,7 +274,7 @@ int fillCodeArr(Processor* processor, const char* fileWithCode){
     fgets(strCommand, sizeof(strCommand), fileCodePtr);
     deleteLastEnter(strCommand);
 
-    int count = sscanf(fileCodePtr, "%d %d", &command, &argument);
+    int count = sscanf(strCommand, "%d %d", &command, &argument);
 
     //sdelat rashirenie massiva v sluchae chego
 
@@ -362,7 +354,7 @@ ActionWithProcess processJump(int typeOfOperation, Stack_t* stack, Processor* pr
     }
     
     if(jmp == true){
-        processor->indOfOper = processor->tags[processor->code[indOfOper + 1] - 1];
+        processor->indOfOper = processor->tags[processor->code[processor->indOfOper + 1] - 1];
         return JUMP;
     }
     if(cont == true){
