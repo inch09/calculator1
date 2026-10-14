@@ -55,18 +55,20 @@ int main(){
     FILE* filePtr = fopen(FILE_WITH_CODE , "r");
     assert(filePtr);
 
+    for(int i = 0; i < processor.countOfCommands; i++){
+        printf("%d ", processor.code[i]);
+    }
+
     while(true){
+        DUMP;
         ActionWithProcess action = processOperation(&processor, &stack);
-        // DUMP;
+        getchar();
         // getchar();
         if(action == COMPLETION){
             DUMP;
-            processor.indOfOper = 0;
             break;
         }
-        if(action != JUMP){
-            processor.indOfOper++;
-        }
+        
     }
     
     free(processor.code);
@@ -124,16 +126,15 @@ void unaryOperation(Stack_t* stack, TypeOfOperation operation){
 #define processBinOp(typeOfOp)\
     case typeOfOp:\
         binaryOperation(stack, typeOfOp);\
+        processor->indOfOper += 1;\
         return CONTINUATION;
 
 #define processUnOp(typeOfOp)\
     case typeOfOp:\
         unaryOperation(stack, typeOfOp);\
+        processor->indOfOper += 1;\
         return CONTINUATION;
 
-#define commandWithoutArg(command)\
-    command == ADD || command ==
-    
 
 ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
     
@@ -162,21 +163,26 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
         processUnOp(SQRT);
 
         case PUSH:
+            printf("push\n");
             stackPush(stack, processor->code[processor->indOfOper + 1]);
+            processor->indOfOper += 2;
             return CONTINUATION;
     
         case POPR:
-            
+            printf("popr\n");
             processPopr(processor->code[processor->indOfOper + 1], processor, stack);
+            processor->indOfOper += 2;
             return CONTINUATION;    
         
         case PSHR:
-            
+            printf("pshr\n");
             processPshr(processor->code[processor->indOfOper + 1], processor, stack);
+            processor->indOfOper += 2;
             return CONTINUATION; 
 
         case TAG:{
             processor->tags[processor->code[processor->indOfOper + 1] - 1] = processor->indOfOper + 1;
+            processor->indOfOper += 2;
             return CONTINUATION;
         }
 
@@ -185,11 +191,13 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
             printf(SPECIFIER, elem);
             printf("\n");
             stackPush(stack, elem);
+            processor->indOfOper += 1;
             return CONTINUATION;
         
         case HLT:
             return COMPLETION;
         default:
+            processor->indOfOper += 1;
             return CONTINUATION;     
     }
     return COMPLETION;
@@ -280,14 +288,17 @@ int fillCodeArr(Processor* processor, const char* fileWithCode){
 
     if(count == 1){
         processor->code[processor->indOfOper++] = command;
+        printf("command = %d, 1\n", command);
     }
     else if(count == 2){
         processor->code[processor->indOfOper++] = command;
         processor->code[processor->indOfOper++] = argument;
+        printf("command = %d, argument = %d, 2\n", command, argument);
     }
     else{
         fclose(fileCodePtr);
         processor->countOfCommands = processor->indOfOper + 1;
+        printf("end\n");
         return -1;
     }
 
@@ -358,6 +369,7 @@ ActionWithProcess processJump(int typeOfOperation, Stack_t* stack, Processor* pr
         return JUMP;
     }
     if(cont == true){
+        processor->indOfOper += 2;
         return CONTINUATION;
     }
     return DEFAULT_ACT;
