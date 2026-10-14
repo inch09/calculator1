@@ -115,6 +115,16 @@ void unaryOperation(Stack_t* stack, TypeOfOperation operation){
 
 }
 
+#define processBinOp(typeOfOp)\
+    case typeOfOp:\
+        binaryOperation(stack, typeOfOp);\
+        return CONTINUATION;
+
+#define processUnOp(typeOfOp)\
+    case typeOfOp:\
+        unaryOperation(stack, typeOfOp);\
+        return CONTINUATION;
+
 ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
     
     assert(stack);
@@ -128,29 +138,14 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
     if(isnan(oper.argument1) && isnan(oper.argument2)){
 
         switch (typeOfOperation){
-        case ADD:
-            binaryOperation(stack, ADD);
-            return CONTINUATION;
-        
-        case SUB:
-            binaryOperation(stack, SUB);
-            return CONTINUATION; 
-        
-        case MUL:
-            binaryOperation(stack, MUL);
-            return CONTINUATION;
-        
-        case DIV:
-            binaryOperation(stack, DIV);
-            return CONTINUATION;    
-        
-        case SIN:
-            unaryOperation(stack, SIN);
-            return CONTINUATION; 
-                
-        case SQRT:
-            unaryOperation(stack, SQRT);
-            return CONTINUATION;
+
+        processBinOp(ADD);
+        processBinOp(SUB);
+        processBinOp(MUL);
+        processBinOp(DIV);
+
+        processUnOp(SIN);
+        processUnOp(SQRT);
 
         case OUT:
             elem = stackPop(stack);
@@ -257,6 +252,9 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
     }
     return COMPLETION;
 }
+
+#undef processBinOp
+#undef processUnOp
 
 void processorInit(Processor* processor, Operation* operations){
     assert(processor);
