@@ -31,6 +31,9 @@ void binaryOperation(Stack_t* stk, TypeOfOperation operation);
 void unaryOperation(Stack_t* stack, TypeOfOperation operation);
 ActionWithProcess processOperation(Processor* processor, Stack_t* stack);
 
+void processPshr(Operation* oper, Processor* processor, Stack_t* stack);
+void processPopr(Operation* oper, Processor* processor, Stack_t* stack);
+
 int main(){
     Operation* operations = translate(FILE_TO_BE_TRANSLATION, FILE_WITH_TRANSLATION_RESULT);
     assert(operations);
@@ -45,12 +48,6 @@ int main(){
     FILE* filePtr = fopen(FILE_WITH_TRANSLATION_RESULT, "r");
     assert(filePtr);
 
-    // while(true){
-    //     char str[20] = {};
-    //     fgets(str, sizeof(str), filePtr);
-    //     deleteLastEnter(str);
-
-    //int indOfOper = 0;
     while(true){
         ActionWithProcess action = processOperation(&processor, &stack);
         // DUMP;
@@ -65,18 +62,6 @@ int main(){
         }
     }
     
-    while(true){
-        ActionWithProcess action = processOperation(&processor, &stack);
-        // DUMP;
-        // getchar();
-        if(action == COMPLETION){
-            DUMP;
-            break;
-        }
-        if(action != JUMP){
-            processor.indOfOper++;
-        }
-    }    
 
     free(operations);
     fclose(filePtr);
@@ -190,50 +175,23 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
                 return CONTINUATION;
         
             case POPR:
-                if(isEqual(oper.argument1, 1)){
-                    processor->registers[0] = stackPop(stack);
-                }
-
-                if(isEqual(oper.argument1, 2)){
-                    processor->registers[1] = stackPop(stack);
-                }
-
-                if(isEqual(oper.argument1, 3)){
-                    processor->registers[2] = stackPop(stack);
-                }
-
-                if(isEqual(oper.argument1, 4)){
-                    processor->registers[3] = stackPop(stack);
-                }
+                
+                processPopr(&oper, processor, stack);
                 return CONTINUATION;    
             
             case PSHR:
-
-            if(isEqual(oper.argument1, 1)){
-                    stackPush(stack, processor->registers[0]);
-                }
-
-                if(isEqual(oper.argument1, 2)){
-                    stackPush(stack, processor->registers[1]);
-                }
-
-                if(isEqual(oper.argument1, 3)){
-                    stackPush(stack, processor->registers[2]);
-                }
-
-                if(isEqual(oper.argument1, 4)){
-                    stackPush(stack, processor->registers[3]);
-                }
+                
+                processPshr(&oper, processor, stack);
                 return CONTINUATION; 
 
             case JMP:
-                processor->indOfOper = processor->tags[(int) oper.argument1 - 1];
+                processor->indOfOper = processor->tags[((int) oper.argument1) - 1];
                 return JUMP;
             case JA:
                 a = stackPop(stack);
                 b = stackPop(stack);
                 if(a < b){
-                    processor->indOfOper = processor->tags[(int) oper.argument1 - 1];
+                    processor->indOfOper = processor->tags[((int) oper.argument1) - 1];
                     return JUMP;
                 }
                 else{
@@ -243,7 +201,7 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
                 a = stackPop(stack);
                 b = stackPop(stack);
                 if(a < b || isEqual(a, b)){
-                    processor->indOfOper = processor->tags[(int) oper.argument1 - 1];
+                    processor->indOfOper = processor->tags[((int) oper.argument1) - 1];
                     return JUMP;
                 }
                 else{
@@ -253,7 +211,7 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
                 a = stackPop(stack);
                 b = stackPop(stack);
                 if(a > b){
-                    processor->indOfOper = processor->tags[(int) oper.argument1 - 1];
+                    processor->indOfOper = processor->tags[((int) oper.argument1) - 1];
                     return JUMP;
                 }
                 else{
@@ -263,7 +221,7 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
                 a = stackPop(stack);
                 b = stackPop(stack);
                 if(a > b || isEqual(a, b)){
-                    processor->indOfOper = processor->tags[(int) oper.argument1 - 1];
+                    processor->indOfOper = processor->tags[((int) oper.argument1) - 1];
                     return JUMP;
                 }
                 else{
@@ -273,7 +231,7 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
                 a = stackPop(stack);
                 b = stackPop(stack);
                 if(isEqual(a, b)){
-                    processor->indOfOper = processor->tags[(int) oper.argument1 - 1];
+                    processor->indOfOper = processor->tags[((int) oper.argument1) - 1];
                     return JUMP;
                 }
                 else{
@@ -283,7 +241,7 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
                 a = stackPop(stack);
                 b = stackPop(stack);
                 if(!isEqual(a, b)){
-                    processor->indOfOper = processor->tags[(int) oper.argument1 - 1];
+                    processor->indOfOper = processor->tags[((int) oper.argument1) - 1];
                     return JUMP;
                 }
                 else{
@@ -303,13 +261,59 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
 void processorInit(Processor* processor, Operation* operations){
     assert(processor);
     assert(operations);
-    for(int i = 0; i < 4; i++){
+    for(size_t i = 0; i < 4; i++){
         processor->registers[i] = 0;
     }
+
     processor->operations = operations;
     processor->indOfOper = 0;
-    for(int i = 0; i < 20; i++){
+    
+    for(size_t i = 0; i < 20; i++){
         processor->tags[i] = -1;
+    }
+}
+
+void processPshr(Operation* oper, Processor* processor, Stack_t* stack){
+    assert(oper);
+    assert(processor);
+    assert(stack);
+
+    if(isEqual(oper->argument1, 1)){
+        stackPush(stack, processor->registers[0]);
+    }
+
+    else if(isEqual(oper->argument1, 2)){
+        stackPush(stack, processor->registers[1]);
+    }
+
+    else if(isEqual(oper->argument1, 3)){
+        stackPush(stack, processor->registers[2]);
+    }
+
+    else if(isEqual(oper->argument1, 4)){
+        stackPush(stack, processor->registers[3]);
+    }
+}
+
+void processPopr(Operation* oper, Processor* processor, Stack_t* stack){
+    assert(oper);
+    assert(processor);
+    assert(stack);
+
+    if(isEqual(oper->argument1, 1)){
+        processor->registers[0] = stackPop(stack);
+    }
+
+    else if(isEqual(oper->argument1, 2)){
+        processor->registers[1] = stackPop(stack);
+    }
+
+    else if(isEqual(oper->argument1, 3)){
+        processor->registers[2] = stackPop(stack);
+    }
+
+    else if(isEqual(oper->argument1, 4)){
+        processor->registers[3] = stackPop(stack);
     }
 }
 

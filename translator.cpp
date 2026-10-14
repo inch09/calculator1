@@ -63,7 +63,6 @@ Operation* translate(const char* file_In, const char* file_Out){
                 strCpyWithSameLength(strArgument1, strArg1);
                 //printf("str arg1 = %s, strlen1 = %d\n", strArgument1, strlen(strArgument1));
                 if(strcmp(strArgument1, "AX") == 0){
-                    printf("67");
                     argument1 = 1;
                 }
                 else if(strcmp(strArgument1, "BX") == 0){
@@ -167,7 +166,7 @@ Operation* translate(const char* file_In, const char* file_Out){
             arrOfOperations[indOfOper] = oper;
             indOfOper++;
             //printf("%lu\n", (unsigned long) indOfOper);
-            printf("%lu\n", (unsigned long) countOper);
+            // printf("%lu\n", (unsigned long) countOper);
 
         }
     }
@@ -244,7 +243,7 @@ void strCpyWithSameLength(char* strCopyTo, char* strCopyFrom){
 
 int getNumOfTag(const char* operationWithTag){
     int numOfTag = -1;
-    //printf("%d, %s\n", strlen(operationWithTag) ,operationWithTag);
+    // printf("%d, %s\n", strlen(operationWithTag) ,operationWithTag);
     char* strNumOfTag = (char*) calloc(strlen(operationWithTag), sizeof(char));
     //printf("strlen  = %d\n", strlen(strNumOfTag));
     assert(strNumOfTag);
