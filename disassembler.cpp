@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <assert.h>
+#include <math.h>
 #include <string.h>
 #include "operations.h"
 
@@ -11,14 +13,18 @@
         strOperation = #operation;  \
         break;
 
-void disAssembling(const char* file_In, const char* file_Out);
+bool isEqual(double a, double b);
+void deleteLastEnter(char* str);
+size_t countOfWords(const char* str);
 
-void disAssembling(const char* file_In, const char* file_Out){
+
+int main(){
     
-    FILE* fileIn = fopen(file_In, "r");
-    FILE* fileOut = fopen(file_Out, "w");
+    FILE* fileIn = fopen(FILE_TO_BE_DISASSEMBLING, "r");
+    FILE* fileOut = fopen(FILE_WITH_DISASSEMBLING_RESULT, "w");
     assert(fileIn);
     assert(fileOut);
+
     while(true){
         char str[20] = {};
         fgets(str, sizeof(str), fileIn);
@@ -37,7 +43,7 @@ void disAssembling(const char* file_In, const char* file_Out){
             sscanf(str, "%d %lf", &codeOfOperation, &argument);
         }
         else{
-            return;
+            return 0;
         }
 
         switch(codeOfOperation){
@@ -92,7 +98,7 @@ void disAssembling(const char* file_In, const char* file_Out){
         }
 
         if(codeOfOperation == HLT){
-            return;
+            return 0;
         }
         fprintf(fileOut, "\n");
     }
@@ -101,3 +107,25 @@ void disAssembling(const char* file_In, const char* file_Out){
 }
 
 #undef GET_OPERATION
+
+bool isEqual(double a, double b){
+    const double epsilon = 0.0001;
+    return fabs(a - b) < epsilon;
+}
+
+void deleteLastEnter(char* str){
+    if(str[strlen(str) - 1] == '\n'){
+        str[strlen(str)- 1] = '\0';
+    }
+}
+
+size_t countOfWords(const char* str){
+    size_t count = 1;
+    for(size_t i = 0; i < strlen(str); i++){
+        if(str[i] == ' '){
+            count++;
+        }
+    }
+    return count;
+}
+

@@ -19,6 +19,7 @@ enum ActionWithProcess{
 struct Processor{
     double registers[4];
     Operation* operations;
+    char* code;
     int indOfOper;
     int tags[20];
 };

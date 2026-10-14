@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <malloc.h>
+#include <assert.h>
 #include <string.h>
 #include <math.h>
 #include "operations.h"
@@ -21,9 +23,9 @@ Operation* translate(const char* file_In, const char* file_Out);
 void strCpyWithSameLength(char* strCopyTo, char* strCopyFrom);
 int getNumOfTag(const char* operationWithTag);
 
-Operation* translate(const char* file_In, const char* file_Out){
-    FILE* fileIn = fopen(file_In, "r");
-    FILE* fileOut = fopen(file_Out, "w");
+int main(){
+    FILE* fileIn = fopen(FILE_TO_BE_TRANSLATION, "r");
+    FILE* fileOut = fopen(FILE_WITH_TRANSLATION_RESULT, "w");
 
 
     assert(fileIn);
@@ -172,7 +174,7 @@ Operation* translate(const char* file_In, const char* file_Out){
     }
     fclose(fileIn);
     fclose(fileOut);
-    return arrOfOperations;
+    // return arrOfOperations;
 }
 
 void deleteLastEnter(char* str){
