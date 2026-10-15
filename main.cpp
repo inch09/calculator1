@@ -72,19 +72,19 @@ int main(){
         
     }
     
-    while(true){
-        DUMP;
-        processorDump(&processor, PROCESSOR_LOG_FILE);
-        getchar();
-        ActionWithProcess action = processOperation(&processor, &stack);
+    // while(true){
+    //     DUMP;
+    //     processorDump(&processor, PROCESSOR_LOG_FILE);
+    //     getchar();
+    //     ActionWithProcess action = processOperation(&processor, &stack);
 
-        if(action == COMPLETION){
-            DUMP;
-            processor.indOfOper = 0;
-            break;
-        }
+    //     if(action == COMPLETION){
+    //         DUMP;
+    //         processor.indOfOper = 0;
+    //         break;
+    //     }
         
-    }
+    // }
     
     free(processor.code);
     fclose(filePtr);
@@ -201,6 +201,20 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
             processor->tags[processor->code[processor->indOfOper + 1] - 1] = processor->indOfOper + 2;
             processor->indOfOper += 2;
             return CONTINUATION;
+        }
+
+        case IN:{
+            int argument = 0;
+            int c = scanf("%d", &argument);
+            if(c == 1){
+                stackPush(stack, argument);
+                processor->indOfOper += 1;
+                return CONTINUATION;
+            }
+            else{
+                printf("error enter\n");
+                return COMPLETION;
+            }
         }
 
         case OUT:

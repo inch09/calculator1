@@ -122,6 +122,9 @@ int main(){
         else if(strcmp(operation, "JNE") == 0){
             codeOfOperation = JNE;
         }
+        else if(strcmp(operation, "IN") == 0){
+            codeOfOperation = IN;
+        }
         else if(strcmp(operation, "OUT") == 0){
             codeOfOperation = OUT;
         }
