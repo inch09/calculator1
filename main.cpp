@@ -8,6 +8,7 @@
 #include "stack.h"
 
 #define FILE_WITH_CODE "code.txt"
+#define PROCESSOR_LOG_FILE "processor.log"
 
 enum ActionWithProcess{
     DEFAULT_ACT,
@@ -28,6 +29,7 @@ struct Processor{
 
 void processorInit(Processor* processor);
 int fillCodeArr(Processor* processor, const char* fileWithCode);
+void processorDump(Processor* processor, const char* processorLogFile);
 
 void binaryOperation(Stack_t* stk, TypeOfOperation operation);
 void unaryOperation(Stack_t* stack, TypeOfOperation operation);
@@ -64,7 +66,8 @@ int main(){
         //printf("ind of oper= %d\n", processor.indOfOper);
         DUMP;
         ActionWithProcess action = processOperation(&processor, &stack);
-        //getchar();
+        processorDump(&processor, PROCESSOR_LOG_FILE);
+        getchar();
 
         if(action == COMPLETION){
             DUMP;
@@ -383,4 +386,25 @@ ActionWithProcess processJump(int typeOfOperation, Stack_t* stack, Processor* pr
         return CONTINUATION;
     }
     return DEFAULT_ACT;
+}
+
+void processorDump(Processor* processor, const char* processorLogFile){
+    assert(processor);
+    FILE* prLogFile = fopen(processorLogFile, "w");
+    assert(prLogFile);
+
+    fprintf(prLogFile, "                  IT IS INFORMATION ABOUT YOUR PROCESSOR\n");
+    for(size_t i = 0; i < processor->countOfCommands; i++){
+        fprintf(prLogFile, "%2d ", processor->code[i]);
+    }
+
+    fprintf(prLogFile, "\n");
+    for(size_t i = 0; i < processor->indOfOper; i++){
+        fprintf(prLogFile, "  ");
+    }
+    fprintf(prLogFile, "^");
+
+    fprintf(prLogFile, "\n\n---------------------------------------------------------------------------------------------------------------------------------------------------------------------\n\n");
+    fprintf(prLogFile, "Current processor instruction: ");
+
 }
