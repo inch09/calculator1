@@ -38,7 +38,7 @@ int main(){
 
         if(str[0] == ':'){
             argument1 = getNumOfTag(str);
-            arrOfTags[argument1 - 1] = indOfOper + 1;        
+            arrOfTags[argument1 - 1] = indOfOper + 2;        
         }
         else if(strcmp(str, "HLT") == 0){
             indOfOper = 0;
@@ -46,7 +46,13 @@ int main(){
         }
 
 
-        indOfOper++;
+        size_t countWord = countOfWords((const char*) str);
+        if(countWord == 1){
+            indOfOper++;
+        }
+        else if(countWord == 2){
+            indOfOper += 2;
+        }
     }
 
         for(size_t i = 0; i < 20; i++){

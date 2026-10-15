@@ -62,6 +62,8 @@ int main(){
     // }
 
     while(true){
+        processorDump(&processor, PROCESSOR_LOG_FILE);
+        getchar();
         ActionWithProcess action = processOperation(&processor, &stack);
         if(action == COMPLETION){
             DUMP;
@@ -183,7 +185,6 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
 
         case TAG:{
             //printf("tag\n");
-            processor->tags[processor->code[processor->indOfOper + 1] - 1] = processor->indOfOper + 2;
             processor->indOfOper += 2;
             return CONTINUATION;
         }
@@ -236,9 +237,6 @@ void processorInit(Processor* processor){
     assert(processor->code);
     processor->countOfCommands = 0;
     
-    for(size_t i = 0; i < 20; i++){
-        processor->tags[i] = -1;
-    }
 }
 
 void processPshr(int argument, Processor* processor, Stack_t* stack){
@@ -387,14 +385,8 @@ ActionWithProcess processJump(int typeOfOperation, Stack_t* stack, Processor* pr
     }
     
     if(jmp == true){
-        if(processor->tags[processor->code[processor->indOfOper + 1] - 1]  >= 0){
-            processor->indOfOper = processor->tags[processor->code[processor->indOfOper + 1] - 1];
-            return JUMP;
-        }
-        else{
-            processor->indOfOper += 2;
-            return CONTINUATION;
-        }
+        processor->indOfOper = processor->code[processor->indOfOper + 1];
+        return JUMP;
     }
     if(cont == true){
         processor->indOfOper += 2;
