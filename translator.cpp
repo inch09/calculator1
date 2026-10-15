@@ -15,6 +15,7 @@ size_t countOfStringsInFile(FILE* file);
 bool strIsNumber(const char* str);
 void strCpyWithSameLength(char* strCopyTo, char* strCopyFrom);
 int getNumOfTag(const char* operationWithTag);
+void assemblingJumps(const char* operation, int* argument, TypeOfOperation* typeOp, int* arrOfTags);
 
 int main(){
     int arrOfTags[20] = {};
@@ -103,6 +104,9 @@ int main(){
             }
 
         }
+
+        assemblingJumps(operation, &argument1, &codeOfOperation, arrOfTags);
+
         if(strcmp(operation, "PUSH") == 0){
             codeOfOperation = PUSH;
         }
@@ -132,27 +136,6 @@ int main(){
         else if(strcmp(operation, "PSHR") == 0){
             codeOfOperation = PSHR;
         }
-        else if(strcmp(operation, "JMP") == 0){
-            codeOfOperation = JMP;
-        }
-        else if(strcmp(operation, "JA") == 0){
-            codeOfOperation = JA;
-        }
-        else if(strcmp(operation, "JAE") == 0){
-            codeOfOperation = JAE;
-        }
-        else if(strcmp(operation, "JB") == 0){
-            codeOfOperation = JB;
-        }
-        else if(strcmp(operation, "JBE") == 0){
-            codeOfOperation = JBE;
-        }
-        else if(strcmp(operation, "JE") == 0){
-            codeOfOperation = JE;
-        }
-        else if(strcmp(operation, "JNE") == 0){
-            codeOfOperation = JNE;
-        }
         else if(strcmp(operation, "IN") == 0){
             codeOfOperation = IN;
         }
@@ -168,8 +151,9 @@ int main(){
         else if(operation[0] == ':'){
             //printf("oper = %s\n", operation);
             codeOfOperation = TAG;
+            argument1 = getNumOfTag(str);
             //printf("getN = %d\n", getNumOfTag(operation));
-            argument1 = arrOfTags[getNumOfTag(operation) - 1];        
+            //argument1 = arrOfTags[getNumOfTag(operation) - 1];        
         }
 
 
@@ -274,4 +258,39 @@ int getNumOfTag(const char* operationWithTag){
     assert(c);
     //printf("numoftg = %d\n", numOfTag);
     return numOfTag;
+}
+
+void assemblingJumps(const char* operation, int* argument, TypeOfOperation* typeOp, int* arrOfTags){
+    assert(operation);
+    assert(argument);
+    assert(typeOp);
+    assert(arrOfTags);    
+    
+    if(strcmp(operation, "JMP") == 0){
+        *typeOp = JMP;
+    }
+    else if(strcmp(operation, "JA") == 0){
+        *typeOp = JA;
+    }
+    else if(strcmp(operation, "JAE") == 0){
+        *typeOp = JAE;
+    }
+    else if(strcmp(operation, "JB") == 0){
+        *typeOp = JB;
+    }
+    else if(strcmp(operation, "JBE") == 0){
+        *typeOp = JBE;
+    }
+    else if(strcmp(operation, "JE") == 0){
+        *typeOp = JE;
+    }
+    else if(strcmp(operation, "JNE") == 0){
+        *typeOp = JNE;
+    }
+    else{
+        return;
+    }
+
+    *argument = arrOfTags[*argument - 1];
+
 }

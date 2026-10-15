@@ -22,7 +22,6 @@ struct Processor{
     int* code;
     size_t countOfCommands;
     int indOfOper;
-    int tags[20];
 };
 
 #define DUMP stackDump(LOG_FILE, &stack);
