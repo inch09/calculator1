@@ -48,6 +48,7 @@ int main(){
     Processor processor = {};
     processorInit(&processor);
     fillCodeArr(&processor, FILE_WITH_CODE);
+    printf("count com = %d\n", processor.countOfCommands);
 
     Stack_t stack = {};
     stackInit(&stack, 10);
@@ -55,15 +56,16 @@ int main(){
     FILE* filePtr = fopen(FILE_WITH_CODE , "r");
     assert(filePtr);
 
-    for(int i = 0; i < processor.countOfCommands; i++){
-        printf("%d ", processor.code[i]);
-    }
+    // for(int i = 0; i < processor.countOfCommands; i++){
+    //     printf("%d ", processor.code[i]);
+    // }
 
     while(true){
+        //printf("ind of oper= %d\n", processor.indOfOper);
         DUMP;
         ActionWithProcess action = processOperation(&processor, &stack);
-        getchar();
-        // getchar();
+        //getchar();
+
         if(action == COMPLETION){
             DUMP;
             break;
@@ -163,30 +165,33 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
         processUnOp(SQRT);
 
         case PUSH:
-            printf("push\n");
+            //printf("push\n");
+            //printf("ind of oper = %d\n", processor->indOfOper);
             stackPush(stack, processor->code[processor->indOfOper + 1]);
             processor->indOfOper += 2;
             return CONTINUATION;
     
         case POPR:
-            printf("popr\n");
+            //printf("popr\n");
             processPopr(processor->code[processor->indOfOper + 1], processor, stack);
             processor->indOfOper += 2;
             return CONTINUATION;    
         
         case PSHR:
-            printf("pshr\n");
+            //printf("pshr\n");
             processPshr(processor->code[processor->indOfOper + 1], processor, stack);
             processor->indOfOper += 2;
             return CONTINUATION; 
 
         case TAG:{
-            processor->tags[processor->code[processor->indOfOper + 1] - 1] = processor->indOfOper + 1;
+            //printf("tag\n");
+            processor->tags[processor->code[processor->indOfOper + 1] - 1] = processor->indOfOper + 2;
             processor->indOfOper += 2;
             return CONTINUATION;
         }
 
         case OUT:
+            //printf("out\n");
             elem = stackPop(stack);
             printf(SPECIFIER, elem);
             printf("\n");
@@ -288,22 +293,25 @@ int fillCodeArr(Processor* processor, const char* fileWithCode){
 
     if(count == 1){
         processor->code[processor->indOfOper++] = command;
-        printf("command = %d, 1\n", command);
+        //printf("command = %d, 1\n", command);
     }
     else if(count == 2){
         processor->code[processor->indOfOper++] = command;
         processor->code[processor->indOfOper++] = argument;
-        printf("command = %d, argument = %d, 2\n", command, argument);
+        //printf("command = %d, argument = %d, 2\n", command, argument);
     }
     else{
         fclose(fileCodePtr);
-        processor->countOfCommands = processor->indOfOper + 1;
-        printf("end\n");
+        processor->countOfCommands = processor->indOfOper;
+        processor->indOfOper = 0;
+        //printf("end\n");
         return -1;
     }
 
     }
 
+    processor->indOfOper = 0;
+    
     fclose(fileCodePtr);
 }
 
@@ -327,6 +335,8 @@ ActionWithProcess processJump(int typeOfOperation, Stack_t* stack, Processor* pr
 
     int a = stackPop(stack);
     int b = stackPop(stack);
+
+    // printf("pop2\n");
 
     switch(typeOfOperation){
     case JMP:
