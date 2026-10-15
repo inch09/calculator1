@@ -6,7 +6,7 @@
 #include "operations.h"
 
 
-#define FILE_TO_BE_TRANSLATION "test10.txt"
+#define FILE_TO_BE_TRANSLATION "test11.txt"
 #define FILE_WITH_TRANSLATION_RESULT "code.txt"
 
 void deleteLastEnter(char* str);
@@ -17,6 +17,10 @@ void strCpyWithSameLength(char* strCopyTo, char* strCopyFrom);
 int getNumOfTag(const char* operationWithTag);
 
 int main(){
+    int arrOfTags[20] = {};
+
+    int indOfOper = 0;
+
     FILE* fileIn = fopen(FILE_TO_BE_TRANSLATION, "r");
     FILE* fileOut = fopen(FILE_WITH_TRANSLATION_RESULT, "w");
 
@@ -24,6 +28,33 @@ int main(){
     assert(fileOut);
 
     while(true){
+
+        char str[20] = {};
+        fgets(str, sizeof(str), fileIn);
+        deleteLastEnter(str);
+
+        int argument1 = 0;
+
+        if(str[0] == ':'){
+            argument1 = getNumOfTag(str);
+            arrOfTags[argument1 - 1] = indOfOper + 1;        
+        }
+        else if(strcmp(str, "HLT") == 0){
+            indOfOper = 0;
+            break;
+        }
+
+
+        indOfOper++;
+    }
+
+        for(size_t i = 0; i < 20; i++){
+        printf("%d ", arrOfTags[i]);
+    }
+
+        rewind(fileIn);
+
+        while(true){
 
 
         char str[20] = {};
@@ -130,6 +161,7 @@ int main(){
         }
         else if(strcmp(operation, "HLT") == 0){
             codeOfOperation = HLT;
+            indOfOper = 0;
             fprintf(fileOut, "%d", codeOfOperation);
             break;
         }
@@ -137,7 +169,7 @@ int main(){
             //printf("oper = %s\n", operation);
             codeOfOperation = TAG;
             //printf("getN = %d\n", getNumOfTag(operation));
-            argument1 = getNumOfTag(operation);        
+            argument1 = arrOfTags[getNumOfTag(operation) - 1];        
         }
 
 
@@ -148,11 +180,15 @@ int main(){
         }
         
         fprintf(fileOut, "\n");
-
+        indOfOper++;
     }
+
     fclose(fileIn);
     fclose(fileOut);
-    // return arrOfOperations;
+
+    for(size_t i = 0; i < 20; i++){
+        printf("%d ", arrOfTags[i]);
+    }
 }
 
 void deleteLastEnter(char* str){

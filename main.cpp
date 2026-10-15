@@ -72,20 +72,6 @@ int main(){
         
     }
     
-    // while(true){
-    //     DUMP;
-    //     processorDump(&processor, PROCESSOR_LOG_FILE);
-    //     getchar();
-    //     ActionWithProcess action = processOperation(&processor, &stack);
-
-    //     if(action == COMPLETION){
-    //         DUMP;
-    //         processor.indOfOper = 0;
-    //         break;
-    //     }
-        
-    // }
-    
     free(processor.code);
     fclose(filePtr);
     
