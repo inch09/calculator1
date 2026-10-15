@@ -6,7 +6,7 @@
 #include "operations.h"
 
 
-#define FILE_TO_BE_TRANSLATION "test11.txt"
+#define FILE_TO_BE_TRANSLATION "test12.txt"
 #define FILE_WITH_TRANSLATION_RESULT "code.txt"
 
 void deleteLastEnter(char* str);
@@ -21,7 +21,7 @@ int main(){
     int arrOfTags[20] = {};
 
     int indOfOper = 0;
-
+    int indOfOperInCode = 0;
     FILE* fileIn = fopen(FILE_TO_BE_TRANSLATION, "r");
     FILE* fileOut = fopen(FILE_WITH_TRANSLATION_RESULT, "w");
 
@@ -29,29 +29,29 @@ int main(){
     assert(fileOut);
 
     while(true){
-
         char str[20] = {};
-        fgets(str, sizeof(str), fileIn);
+        char* strptr = fgets(str, sizeof(str), fileIn);
+        if(strptr == NULL){
+            indOfOperInCode = 0;
+            break;
+        }
         deleteLastEnter(str);
 
         int argument1 = 0;
 
         if(str[0] == ':'){
             argument1 = getNumOfTag(str);
-            arrOfTags[argument1 - 1] = indOfOper + 2;        
+            arrOfTags[argument1 - 1] = indOfOperInCode + 2;  
+            indOfOperInCode += 2;
+            continue;      
         }
-        else if(strcmp(str, "HLT") == 0){
-            indOfOper = 0;
-            break;
-        }
-
 
         size_t countWord = countOfWords((const char*) str);
         if(countWord == 1){
-            indOfOper++;
+            indOfOperInCode++;
         }
         else if(countWord == 2){
-            indOfOper += 2;
+            indOfOperInCode += 2;
         }
     }
 
@@ -65,7 +65,11 @@ int main(){
 
 
         char str[20] = {};
-        fgets(str, sizeof(str), fileIn);
+        char* strptr = fgets(str, sizeof(str), fileIn);
+        if(strptr == NULL){
+            indOfOper = 0;
+            break;
+        }
         deleteLastEnter(str);
 
         char strArg1[15] = {}; 
@@ -150,9 +154,9 @@ int main(){
         }
         else if(strcmp(operation, "HLT") == 0){
             codeOfOperation = HLT;
-            indOfOper = 0;
-            fprintf(fileOut, "%d", codeOfOperation);
-            break;
+            // indOfOper = 0;
+            // fprintf(fileOut, "%d", codeOfOperation);
+            // break;
         }
         else if(operation[0] == ':'){
             //printf("oper = %s\n", operation);

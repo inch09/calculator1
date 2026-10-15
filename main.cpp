@@ -343,9 +343,13 @@ ActionWithProcess processJump(int typeOfOperation, Stack_t* stack, Processor* pr
        typeOfOperation != JB  && typeOfOperation != JBE && typeOfOperation != JE &&
        typeOfOperation != JNE) return DEFAULT_ACT;
 
+    if(typeOfOperation == JMP){
+        processor->indOfOper = processor->code[processor->indOfOper + 1];
+        return JUMP;
+    }
+
     int a = stackPop(stack);
     int b = stackPop(stack);
-
     // printf("pop2\n");
 
     switch(typeOfOperation){
