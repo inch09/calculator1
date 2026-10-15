@@ -6,7 +6,7 @@
 #include "operations.h"
 
 
-#define FILE_TO_BE_TRANSLATION "test9.txt"
+#define FILE_TO_BE_TRANSLATION "test10.txt"
 #define FILE_WITH_TRANSLATION_RESULT "code.txt"
 
 void deleteLastEnter(char* str);

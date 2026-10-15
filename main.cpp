@@ -63,14 +63,24 @@ int main(){
     // }
 
     while(true){
-        //printf("ind of oper= %d\n", processor.indOfOper);
-        DUMP;
         ActionWithProcess action = processOperation(&processor, &stack);
+        if(action == COMPLETION){
+            DUMP;
+            processor.indOfOper = 0;
+            break;
+        }
+        
+    }
+    
+    while(true){
+        DUMP;
         processorDump(&processor, PROCESSOR_LOG_FILE);
         getchar();
+        ActionWithProcess action = processOperation(&processor, &stack);
 
         if(action == COMPLETION){
             DUMP;
+            processor.indOfOper = 0;
             break;
         }
         
@@ -378,8 +388,14 @@ ActionWithProcess processJump(int typeOfOperation, Stack_t* stack, Processor* pr
     }
     
     if(jmp == true){
-        processor->indOfOper = processor->tags[processor->code[processor->indOfOper + 1] - 1];
-        return JUMP;
+        if(processor->tags[processor->code[processor->indOfOper + 1] - 1]  >= 0){
+            processor->indOfOper = processor->tags[processor->code[processor->indOfOper + 1] - 1];
+            return JUMP;
+        }
+        else{
+            processor->indOfOper += 2;
+            return CONTINUATION;
+        }
     }
     if(cont == true){
         processor->indOfOper += 2;
@@ -400,11 +416,12 @@ void processorDump(Processor* processor, const char* processorLogFile){
 
     fprintf(prLogFile, "\n");
     for(size_t i = 0; i < processor->indOfOper; i++){
-        fprintf(prLogFile, "  ");
+        fprintf(prLogFile, "   ");
     }
     fprintf(prLogFile, "^");
 
     fprintf(prLogFile, "\n\n---------------------------------------------------------------------------------------------------------------------------------------------------------------------\n\n");
     fprintf(prLogFile, "Current processor instruction: ");
+    fclose(prLogFile);
 
 }
