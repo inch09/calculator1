@@ -8,7 +8,7 @@
 struct Tag{
     char nameOfTag[10]; 
     size_t indOfOper;
-}
+};
 
 #define FILE_TO_BE_TRANSLATION "test13.txt"//comand string
 #define FILE_WITH_TRANSLATION_RESULT "code.txt"
@@ -24,10 +24,14 @@ bool strIsNumber(const char* str);
 void strCpyWithSameLength(char* strCopyTo, char* strCopyFrom);
 
 int getNumOfTag(const char* operationWithTag);
-void assemblingJumps(const char* operation, int* argument, TypeOfOperation* typeOp, int* arrOfTags);
+void assembleJumps(const char* operation, int* argument, TypeOfOperation* typeOp, int* arrOfTags);
+void assembleFuncWithoutJmp(const char* operation, TypeOfOperation* codeOfOp);
+void assembleTag(const char* operation, int* argument, TypeOfOperation* codeOfOp, const char* str);
+
+void printComandInFile(int countWord, int argument, TypeOfOperation* codeOfOp, FILE* fileOut);
 
 int main(){
-    Tag arrOfTags[20] = {};
+    int arrOfTags[20] = {};
 
     FILE* fileIn = fopen(FILE_TO_BE_TRANSLATION, "r");
     FILE* fileOut = fopen(FILE_WITH_TRANSLATION_RESULT, "w");
@@ -151,7 +155,7 @@ int getNumOfTag(const char* operationWithTag){
     return numOfTag;
 }
 
-void assemblingJumps(const char* operation, int* argument, TypeOfOperation* typeOp, int* arrOfTags){
+void assembleJumps(const char* operation, int* argument, TypeOfOperation* typeOp, int* arrOfTags){
     assert(operation);
     assert(argument);
     assert(typeOp);
@@ -177,6 +181,13 @@ void assemblingJumps(const char* operation, int* argument, TypeOfOperation* type
     }
     else if(strcmp(operation, "JNE") == 0){
         *typeOp = JNE;
+    }
+    else if(strcmp(operation, "CALL") == 0){
+        *typeOp = CALL;
+    }
+    else if(strcmp(operation, "RET") == 0){
+        *typeOp = RET;
+        return;
     }
     else{
         return;
@@ -262,9 +273,6 @@ void secondAssemPass(FILE* fileIn, FILE* fileOut, int* arrOfTags){
                 else if(strcmp(strArgument1, "DX") == 0){
                     argument1 = 4;
                 }
-                // if(strcmp(operation, "POPR")==0 || strcmp(operation, "PSHR") == 0){
-                // printf("%s", operation);
-                // }
                 free(strArgument1);
             }
 
@@ -274,72 +282,87 @@ void secondAssemPass(FILE* fileIn, FILE* fileOut, int* arrOfTags){
 
         }
 
-        assemblingJumps(operation, &argument1, &codeOfOperation, arrOfTags);
+        assembleJumps(operation, &argument1, &codeOfOperation, arrOfTags);
+        assembleFuncWithoutJmp(operation, &codeOfOperation);
+        assembleTag(operation, &argument1, &codeOfOperation, str);
 
-        if(strcmp(operation, "PUSH") == 0){
-            codeOfOperation = PUSH;
-        }
-        else if(strcmp(operation, "ADD") == 0){
-            codeOfOperation = ADD;
-        }
-        else if(strcmp(operation, "SUB") == 0){
-            codeOfOperation = SUB;
-        }
-        else if(strcmp(operation, "MUL") == 0){
-            codeOfOperation = MUL;
-        }
-        else if(strcmp(operation, "DIV") == 0){
-            codeOfOperation = DIV;
-        }
-        else if(strcmp(operation, "SIN") == 0){
-            codeOfOperation = SIN;
-        }
-        else if(strcmp(operation, "SQRT") == 0){
-            codeOfOperation = SQRT;
-        }
-        else if(strcmp(operation, "POPR") == 0){
-            // printf("POPR");
-            // printf("%lf", argument1);
-            codeOfOperation = POPR;
-        }
-        else if(strcmp(operation, "PSHR") == 0){
-            codeOfOperation = PSHR;
-        }
-        else if(strcmp(operation, "IN") == 0){
-            codeOfOperation = IN;
-        }
-        else if(strcmp(operation, "OUT") == 0){
-            codeOfOperation = OUT;
-        }
-        else if(strcmp(operation, "HLT") == 0){
-            codeOfOperation = HLT;
-            // indOfOper = 0;
-            // fprintf(fileOut, "%d", codeOfOperation);
-            // break;
-        }
-        else if(operation[0] == ':'){
-            //printf("oper = %s\n", operation);
-            codeOfOperation = TAG;
-            argument1 = getNumOfTag(str);
-            //printf("getN = %d\n", getNumOfTag(operation));
-            //argument1 = arrOfTags[getNumOfTag(operation) - 1];        
-        }
-        else if(strcmp(operation, "CALL") == 0){
-            codeOfOperation = CALL;
-            argument1 = arrOfTags[argument1 - 1];
-        }
-        else if(strcmp(operation, "RET") == 0){
-            codeOfOperation = RET;
-        }
+        printComandInFile(countWord, argument1, &codeOfOperation, fileOut);
 
-
-        fprintf(fileOut, "%d", codeOfOperation);
-
-        if(countWord == 2 || codeOfOperation == TAG){
-            fprintf(fileOut, " %d", argument1);
-        }
-        
-        fprintf(fileOut, "\n");
         indOfOper++;
     }
+}
+
+void assembleFuncWithoutJmp(const char* operation, TypeOfOperation* codeOfOp){
+    assert(operation);
+    assert(codeOfOp);
+        if(strcmp(operation, "PUSH") == 0){
+            *codeOfOp = PUSH;
+        }
+        else if(strcmp(operation, "ADD") == 0){
+            *codeOfOp = ADD;
+        }
+        else if(strcmp(operation, "SUB") == 0){
+            *codeOfOp = SUB;
+        }
+        else if(strcmp(operation, "MUL") == 0){
+            *codeOfOp = MUL;
+        }
+        else if(strcmp(operation, "DIV") == 0){
+            *codeOfOp = DIV;
+        }
+        else if(strcmp(operation, "SIN") == 0){
+            *codeOfOp = SIN;
+        }
+        else if(strcmp(operation, "SQRT") == 0){
+            *codeOfOp = SQRT;
+        }
+        else if(strcmp(operation, "POPR") == 0){
+            *codeOfOp = POPR;
+        }
+        else if(strcmp(operation, "PSHR") == 0){
+            *codeOfOp = PSHR;
+        }
+        else if(strcmp(operation, "IN") == 0){
+            *codeOfOp = IN;
+        }
+        else if(strcmp(operation, "OUT") == 0){
+            *codeOfOp = OUT;
+        }
+        else if(strcmp(operation, "HLT") == 0){
+            *codeOfOp = HLT;
+        }
+
+}
+
+void assembleTag(const char* operation, int* argument, TypeOfOperation* codeOfOp, const char* str){
+    assert(operation);
+    assert(argument);
+    assert(codeOfOp);
+    assert(str);
+    
+    if(operation[0] == ':'){
+        *codeOfOp = TAG;
+        *argument = getNumOfTag(str);    
+    }
+}
+
+void printComandInFile(int countWord, int argument, TypeOfOperation* codeOfOp, FILE* fileOut){
+    assert(fileOut);
+    assert(codeOfOp);
+    
+    if(countWord == 1){
+        if(*codeOfOp == TAG){
+            fprintf(fileOut, "%d", *codeOfOp);
+            fprintf(fileOut, " %d", argument);
+        }
+        else{
+            fprintf(fileOut, "%d", *codeOfOp);
+        }    
+    }    
+    else if(countWord == 2){
+        fprintf(fileOut, "%d", *codeOfOp);
+        fprintf(fileOut, " %d", argument);
+    }
+        
+    fprintf(fileOut, "\n");
 }
