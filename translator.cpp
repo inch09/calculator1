@@ -6,15 +6,18 @@
 #include "operations.h"
 
 struct Tag{
-    char nameOfTag[10]; 
+    char name[10]; 
     size_t indOfOper;
 };
 
 #define FILE_TO_BE_TRANSLATION "test13.txt"//comand string
 #define FILE_WITH_TRANSLATION_RESULT "code.txt"
 
-void firstAssemPass(FILE* fileIn, int* arrOfTags);
-void secondAssemPass(FILE* fileIn, FILE* fileOut, int* arrOfTags);
+#define MAX_COUNT_OF_TAGS 20
+#define MAX_LENGTH_OF_TAG 10
+
+void firstAssemPass(FILE* fileIn, Tag* arrOfTags);
+void secondAssemPass(FILE* fileIn, FILE* fileOut, Tag* arrOfTags);
 
 void processOperWithArg(const char* stringOper, int* argument, char* operation);
 
@@ -26,15 +29,17 @@ bool strIsNumber(const char* str);
 void strCpyWithSameLength(char* strCopyTo, char* strCopyFrom);
 bool strIsWithoutOperations(const char* str);
 
-int getNumOfTag(const char* operationWithTag);
-void assembleJumps(const char* operation, int* argument, TypeOfOperation* typeOp, int* arrOfTags);
+void getNameOfTag(const char* operationWithTag, char* nameOfTag);
+int getIndOfTagByName(Tag* arrOfTags, const char* nameTag);
+
+void assembleJumps(const char* operation, int* argument, TypeOfOperation* typeOp, Tag* arrOfTags, char* operStr);
 void assembleFuncWithoutJmp(const char* operation, TypeOfOperation* codeOfOp);
-void assembleTag(const char* operation, int* argument, TypeOfOperation* codeOfOp, const char* str);
+void assembleTag(const char* operation, int* argument, TypeOfOperation* codeOfOp, const char* str, Tag* arrOfTags);
 
 void printComandInFile(int countWord, int argument, TypeOfOperation* codeOfOp, FILE* fileOut);
 //-------------------------------------------------------------------------
 int main(){
-    int arrOfTags[20] = {};
+    Tag arrOfTags[MAX_COUNT_OF_TAGS] = {};
 
     FILE* fileIn = fopen(FILE_TO_BE_TRANSLATION, "r");
     FILE* fileOut = fopen(FILE_WITH_TRANSLATION_RESULT, "w");
@@ -136,32 +141,23 @@ void strCpyWithSameLength(char* strCopyTo, char* strCopyFrom){
     assert(strCopyFromLen == strCopyToLen);
 }
 //-------------------------------------------------------------------------
-int getNumOfTag(const char* operationWithTag){
-    int numOfTag = -1;
-
-    char* strNumOfTag = (char*) calloc(strlen(operationWithTag), sizeof(char));
-    assert(strNumOfTag);
+void getNameOfTag(const char* operationWithTag, char* nameOfTag){
+    assert(operationWithTag);
 
     size_t operationWithTagLen = strlen(operationWithTag);
+    assert(operationWithTagLen <= MAX_LENGTH_OF_TAG + 1);
 
     for(size_t i = 0; i < operationWithTagLen - 1; i++){
         assert(i + 1 < operationWithTagLen);
-        assert(operationWithTag[i + 1] >= '0' && operationWithTag[i + 1] <= '9');
-
-        strNumOfTag[i] = operationWithTag[i + 1];
+        nameOfTag[i] = operationWithTag[i + 1];
     }
-
-    int c = sscanf(strNumOfTag, "%d", &numOfTag);
-    free(strNumOfTag);
-    assert(c);
-
-    return numOfTag;
 }
 //-------------------------------------------------------------------------
-void firstAssemPass(FILE* fileIn, int* arrOfTags){
+void firstAssemPass(FILE* fileIn, Tag* arrOfTags){
     assert(fileIn);
 
     int indOfOperInCode = 0;
+    int indOfTag = 0;
 
     while(true){
 
@@ -178,11 +174,11 @@ void firstAssemPass(FILE* fileIn, int* arrOfTags){
             continue;
         }
 
-        int argument = 0;
+        // int argument = 0;
 
         if(str[0] == ':'){//func with tag
-            argument = getNumOfTag(str);
-            arrOfTags[argument - 1] = indOfOperInCode + 2;  
+            getNameOfTag(str, arrOfTags[indOfTag].name);
+            arrOfTags[indOfTag].indOfOper = indOfOperInCode + 2;  
             indOfOperInCode += 2;
             continue;      
         }
@@ -197,7 +193,7 @@ void firstAssemPass(FILE* fileIn, int* arrOfTags){
     }
 }
 //-------------------------------------------------------------------------
-void secondAssemPass(FILE* fileIn, FILE* fileOut, int* arrOfTags){
+void secondAssemPass(FILE* fileIn, FILE* fileOut, Tag* arrOfTags){
     int indOfOper = 0;
        
     while(true){
@@ -227,9 +223,9 @@ void secondAssemPass(FILE* fileIn, FILE* fileOut, int* arrOfTags){
             processOperWithArg(str, &argument, operation);
         }
 
-        assembleJumps(operation, &argument, &codeOfOperation, arrOfTags);
+        assembleJumps(operation, &argument, &codeOfOperation, arrOfTags, str);
         assembleFuncWithoutJmp(operation, &codeOfOperation);
-        assembleTag(operation, &argument, &codeOfOperation, str);
+        assembleTag(operation, &argument, &codeOfOperation, str, arrOfTags);
 
         printComandInFile(countWord, argument, &codeOfOperation, fileOut);
 
@@ -237,7 +233,7 @@ void secondAssemPass(FILE* fileIn, FILE* fileOut, int* arrOfTags){
     }
 }
 //-------------------------------------------------------------------------
-void assembleJumps(const char* operation, int* argument, TypeOfOperation* typeOp, int* arrOfTags){
+void assembleJumps(const char* operation, int* argument, TypeOfOperation* typeOp, Tag* arrOfTags, char* operStr){
     assert(operation);
     assert(argument);
     assert(typeOp);
@@ -275,7 +271,10 @@ void assembleJumps(const char* operation, int* argument, TypeOfOperation* typeOp
         return;
     }
 
-    *argument = arrOfTags[*argument - 1];
+    char nameOfTag[MAX_LENGTH_OF_TAG] = {};
+    getNameOfTag(operStr, nameOfTag);
+
+    *argument = getIndOfTagByName(arrOfTags, nameOfTag);
 
 }
 //-------------------------------------------------------------------------
@@ -322,7 +321,7 @@ void assembleFuncWithoutJmp(const char* operation, TypeOfOperation* codeOfOp){
 
 }
 //-------------------------------------------------------------------------
-void assembleTag(const char* operation, int* argument, TypeOfOperation* codeOfOp, const char* str){
+void assembleTag(const char* operation, int* argument, TypeOfOperation* codeOfOp, const char* str, Tag* arrOfTags){
     assert(operation);
     assert(argument);
     assert(codeOfOp);
@@ -330,7 +329,16 @@ void assembleTag(const char* operation, int* argument, TypeOfOperation* codeOfOp
     
     if(operation[0] == ':'){
         *codeOfOp = TAG;
-        *argument = getNumOfTag(str);    
+        char nameOfTag[MAX_LENGTH_OF_TAG] = {};
+        getNameOfTag(str, nameOfTag);
+        int ind = getIndOfTagByName(arrOfTags, nameOfTag);
+        if(ind >= 0){
+            *argument = ind;
+        }
+        else{
+            assert(strcmp("THIS TAG IS NOT SEARCH" , " ") == 0);
+        }
+
     }
 }
 //-------------------------------------------------------------------------
@@ -397,5 +405,19 @@ bool strIsWithoutOperations(const char* str){
           }
     }
     return without;
+}
+
+int getIndOfTagByName(Tag* arrOfTags, const char* nameTag){
+    assert(arrOfTags);
+    assert(nameTag);
+    int indOfTag = -1;
+
+    for(size_t i = 0; i < MAX_COUNT_OF_TAGS; i++){
+        if(strcmp(nameTag, arrOfTags[i].name) == 0){
+            indOfTag = arrOfTags[i].indOfOper;
+            break;
+        }
+    }
+    return indOfTag;
 }
 
