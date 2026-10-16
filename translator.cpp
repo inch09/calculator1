@@ -32,7 +32,7 @@ void assembleFuncWithoutJmp(const char* operation, TypeOfOperation* codeOfOp);
 void assembleTag(const char* operation, int* argument, TypeOfOperation* codeOfOp, const char* str);
 
 void printComandInFile(int countWord, int argument, TypeOfOperation* codeOfOp, FILE* fileOut);
-
+//-------------------------------------------------------------------------
 int main(){
     int arrOfTags[20] = {};
 
@@ -59,16 +59,14 @@ int main(){
     // }
 }
 
-
-
-
+//-------------------------------------------------------------------------
 void deleteLastEnter(char* str){
     size_t lenOfStr = strlen(str);
     if (str[lenOfStr - 1] == '\n'){
         str[lenOfStr- 1] = '\0';
     }
 }
-
+//-------------------------------------------------------------------------
 size_t countOfWords(const char* str){
     size_t count = 1;
     size_t lenOfStr = strlen(str);
@@ -80,7 +78,7 @@ size_t countOfWords(const char* str){
     }
     return count;
 }
-
+//-------------------------------------------------------------------------
 size_t countOfStringsInFile(FILE* file){
     assert(file);
     
@@ -100,7 +98,7 @@ size_t countOfStringsInFile(FILE* file){
     rewind(file);
     return count;
 }
-
+//-------------------------------------------------------------------------
 bool strIsNumber(const char* str){
     assert(str);
 
@@ -124,8 +122,7 @@ bool strIsNumber(const char* str){
 
     return true;
 }
-
-//strlen fix
+//-------------------------------------------------------------------------
 void strCpyWithSameLength(char* strCopyTo, char* strCopyFrom){
     assert(strCopyTo);
     assert(strCopyFrom);
@@ -138,7 +135,7 @@ void strCpyWithSameLength(char* strCopyTo, char* strCopyFrom){
     }
     assert(strCopyFromLen == strCopyToLen);
 }
-
+//-------------------------------------------------------------------------
 int getNumOfTag(const char* operationWithTag){
     int numOfTag = -1;
 
@@ -160,8 +157,7 @@ int getNumOfTag(const char* operationWithTag){
 
     return numOfTag;
 }
-
-
+//-------------------------------------------------------------------------
 void firstAssemPass(FILE* fileIn, int* arrOfTags){
     assert(fileIn);
 
@@ -200,7 +196,7 @@ void firstAssemPass(FILE* fileIn, int* arrOfTags){
         }
     }
 }
-
+//-------------------------------------------------------------------------
 void secondAssemPass(FILE* fileIn, FILE* fileOut, int* arrOfTags){
     int indOfOper = 0;
        
@@ -240,10 +236,7 @@ void secondAssemPass(FILE* fileIn, FILE* fileOut, int* arrOfTags){
         indOfOper++;
     }
 }
-
-
-
-
+//-------------------------------------------------------------------------
 void assembleJumps(const char* operation, int* argument, TypeOfOperation* typeOp, int* arrOfTags){
     assert(operation);
     assert(argument);
@@ -285,8 +278,7 @@ void assembleJumps(const char* operation, int* argument, TypeOfOperation* typeOp
     *argument = arrOfTags[*argument - 1];
 
 }
-
-
+//-------------------------------------------------------------------------
 void assembleFuncWithoutJmp(const char* operation, TypeOfOperation* codeOfOp){
     assert(operation);
     assert(codeOfOp);
@@ -329,7 +321,7 @@ void assembleFuncWithoutJmp(const char* operation, TypeOfOperation* codeOfOp){
         }
 
 }
-
+//-------------------------------------------------------------------------
 void assembleTag(const char* operation, int* argument, TypeOfOperation* codeOfOp, const char* str){
     assert(operation);
     assert(argument);
@@ -341,7 +333,7 @@ void assembleTag(const char* operation, int* argument, TypeOfOperation* codeOfOp
         *argument = getNumOfTag(str);    
     }
 }
-
+//-------------------------------------------------------------------------
 void printComandInFile(int countWord, int argument, TypeOfOperation* codeOfOp, FILE* fileOut){
     assert(fileOut);
     assert(codeOfOp);
@@ -362,7 +354,7 @@ void printComandInFile(int countWord, int argument, TypeOfOperation* codeOfOp, F
         
     fprintf(fileOut, "\n");
 }
-
+//-------------------------------------------------------------------------
 void processOperWithArg(const char* stringOper, int* argument, char* operation){
     assert(stringOper);
     assert(argument);
@@ -391,7 +383,7 @@ void processOperWithArg(const char* stringOper, int* argument, char* operation){
         sscanf(stringOper, "%s %d", operation, argument);
     }
 }
-
+//-------------------------------------------------------------------------
 bool strIsWithoutOperations(const char* str){
     assert(str);
     
