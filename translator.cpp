@@ -16,6 +16,8 @@ struct Tag{
 void firstAssemPass(FILE* fileIn, int* arrOfTags);
 void secondAssemPass(FILE* fileIn, FILE* fileOut, int* arrOfTags);
 
+void processOperWithArg(const char* stringOper, int* argument, char* operation);
+
 void deleteLastEnter(char* str);
 
 size_t countOfWords(const char* str);
@@ -55,6 +57,9 @@ int main(){
     //     printf("%d ", arrOfTags[i]);
     // }
 }
+
+
+
 
 void deleteLastEnter(char* str){
     size_t lenOfStr = strlen(str);
@@ -155,6 +160,80 @@ int getNumOfTag(const char* operationWithTag){
     return numOfTag;
 }
 
+
+void firstAssemPass(FILE* fileIn, int* arrOfTags){
+    assert(fileIn);
+
+    int indOfOperInCode = 0;
+
+    while(true){
+        const int maxLengthOfStrWithOper = 20; 
+        char str[maxLengthOfStrWithOper] = {};
+        char* strptr = fgets(str, sizeof(str), fileIn);
+        if(strptr == NULL){
+            indOfOperInCode = 0;
+            break;
+        }
+        deleteLastEnter(str);
+
+        int argument = 0;
+
+        if(str[0] == ':'){//func with tag
+            argument = getNumOfTag(str);
+            arrOfTags[argument - 1] = indOfOperInCode + 2;  
+            indOfOperInCode += 2;
+            continue;      
+        }
+
+        size_t countWord = countOfWords((const char*) str);
+        if(countWord == 1){
+            indOfOperInCode++;
+        }
+        else if(countWord == 2){
+            indOfOperInCode += 2;
+        }
+    }
+}
+
+void secondAssemPass(FILE* fileIn, FILE* fileOut, int* arrOfTags){
+    int indOfOper = 0;
+       
+    while(true){
+        const int maxLengthOfStrWithOper = 20; 
+        char str[maxLengthOfStrWithOper] = {};
+        char* strptr = fgets(str, sizeof(str), fileIn);
+        if(strptr == NULL){
+            indOfOper = 0;
+            break;
+        }
+        deleteLastEnter(str);
+
+        const int maxLengthOfOper = 7;
+        char operation[maxLengthOfOper] = {};
+        int argument = 0;
+        TypeOfOperation codeOfOperation = DEFAULT;
+        
+        size_t countWord = countOfWords(str);
+        if(countWord == 1){
+            sscanf(str, "%s", operation);
+        }
+        else if(countWord == 2){
+            processOperWithArg(str, &argument, operation);
+        }
+
+        assembleJumps(operation, &argument, &codeOfOperation, arrOfTags);
+        assembleFuncWithoutJmp(operation, &codeOfOperation);
+        assembleTag(operation, &argument, &codeOfOperation, str);
+
+        printComandInFile(countWord, argument, &codeOfOperation, fileOut);
+
+        indOfOper++;
+    }
+}
+
+
+
+
 void assembleJumps(const char* operation, int* argument, TypeOfOperation* typeOp, int* arrOfTags){
     assert(operation);
     assert(argument);
@@ -197,100 +276,6 @@ void assembleJumps(const char* operation, int* argument, TypeOfOperation* typeOp
 
 }
 
-void firstAssemPass(FILE* fileIn, int* arrOfTags){
-    assert(fileIn);
-
-    int indOfOperInCode = 0;
-
-    while(true){
-    char str[20] = {};
-        char* strptr = fgets(str, sizeof(str), fileIn);
-        if(strptr == NULL){
-            indOfOperInCode = 0;
-            break;
-        }
-        deleteLastEnter(str);
-
-        int argument1 = 0;
-
-        if(str[0] == ':'){//func with tag
-            argument1 = getNumOfTag(str);
-            arrOfTags[argument1 - 1] = indOfOperInCode + 2;  
-            indOfOperInCode += 2;
-            continue;      
-        }
-
-        size_t countWord = countOfWords((const char*) str);
-        if(countWord == 1){
-            indOfOperInCode++;
-        }
-        else if(countWord == 2){
-            indOfOperInCode += 2;
-        }
-    }
-}
-
-void secondAssemPass(FILE* fileIn, FILE* fileOut, int* arrOfTags){
-    int indOfOper = 0;
-       while(true){
-
-        char str[20] = {};
-        char* strptr = fgets(str, sizeof(str), fileIn);
-        if(strptr == NULL){
-            indOfOper = 0;
-            break;
-        }
-        deleteLastEnter(str);
-
-        char strArg1[15] = {}; 
-        
-        char operation[5] = {};
-        TypeOfOperation codeOfOperation = DEFAULT;
-        int argument1 = 0;
-        size_t countWord = countOfWords((const char*) str);
-
-        if(countWord == 1){
-            sscanf(str, "%s", operation);
-        }
-        else if(countWord == 2){
-            sscanf(str, "%s %s", operation, strArg1);
-
-            if(!strIsNumber(strArg1)){  
-
-                char* strArgument1 = (char*) calloc(strlen(strArg1) + 1, sizeof(char));
-                assert(strArgument1); 
-                strCpyWithSameLength(strArgument1, strArg1);
-                //printf("str arg1 = %s, strlen1 = %d\n", strArgument1, strlen(strArgument1));
-                if(strcmp(strArgument1, "AX") == 0){
-                    argument1 = 1;
-                }
-                else if(strcmp(strArgument1, "BX") == 0){
-                    argument1 = 2;
-                }
-                else if(strcmp(strArgument1, "CX") == 0){
-                    argument1 = 3;
-                }
-                else if(strcmp(strArgument1, "DX") == 0){
-                    argument1 = 4;
-                }
-                free(strArgument1);
-            }
-
-            else{
-                sscanf(str, "%s %d", operation, &argument1);
-            }
-
-        }
-
-        assembleJumps(operation, &argument1, &codeOfOperation, arrOfTags);
-        assembleFuncWithoutJmp(operation, &codeOfOperation);
-        assembleTag(operation, &argument1, &codeOfOperation, str);
-
-        printComandInFile(countWord, argument1, &codeOfOperation, fileOut);
-
-        indOfOper++;
-    }
-}
 
 void assembleFuncWithoutJmp(const char* operation, TypeOfOperation* codeOfOp){
     assert(operation);
@@ -366,3 +351,37 @@ void printComandInFile(int countWord, int argument, TypeOfOperation* codeOfOp, F
         
     fprintf(fileOut, "\n");
 }
+
+void processOperWithArg(const char* stringOper, int* argument, char* operation){
+    assert(stringOper);
+    assert(argument);
+    assert(operation);
+
+    char stringArg[15] = {}; 
+
+    sscanf(stringOper, "%s %s", operation, stringArg);
+
+    if(!strIsNumber(stringArg)){  
+        if(strcmp(stringArg, "AX") == 0){
+            *argument = 1;
+        }
+        else if(strcmp(stringArg, "BX") == 0){
+            *argument = 2;
+        }
+        else if(strcmp(stringArg, "CX") == 0){
+            *argument = 3;
+        }
+        else if(strcmp(stringArg, "DX") == 0){
+            *argument = 4;
+        }
+    }
+
+    else{
+        sscanf(stringOper, "%s %d", operation, argument);
+    }
+}
+
+void processCountWordsInOper(){
+
+}
+
