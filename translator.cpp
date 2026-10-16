@@ -24,6 +24,7 @@ size_t countOfWords(const char* str);
 size_t countOfStringsInFile(FILE* file);
 bool strIsNumber(const char* str);
 void strCpyWithSameLength(char* strCopyTo, char* strCopyFrom);
+bool strIsWithoutOperations(const char* str);
 
 int getNumOfTag(const char* operationWithTag);
 void assembleJumps(const char* operation, int* argument, TypeOfOperation* typeOp, int* arrOfTags);
@@ -167,6 +168,7 @@ void firstAssemPass(FILE* fileIn, int* arrOfTags){
     int indOfOperInCode = 0;
 
     while(true){
+
         const int maxLengthOfStrWithOper = 20; 
         char str[maxLengthOfStrWithOper] = {};
         char* strptr = fgets(str, sizeof(str), fileIn);
@@ -175,6 +177,10 @@ void firstAssemPass(FILE* fileIn, int* arrOfTags){
             break;
         }
         deleteLastEnter(str);
+
+        if(strIsWithoutOperations(str)){
+            continue;
+        }
 
         int argument = 0;
 
@@ -207,6 +213,10 @@ void secondAssemPass(FILE* fileIn, FILE* fileOut, int* arrOfTags){
             break;
         }
         deleteLastEnter(str);
+
+        if(strIsWithoutOperations(str)){
+            continue;
+        }
 
         const int maxLengthOfOper = 7;
         char operation[maxLengthOfOper] = {};
@@ -280,6 +290,7 @@ void assembleJumps(const char* operation, int* argument, TypeOfOperation* typeOp
 void assembleFuncWithoutJmp(const char* operation, TypeOfOperation* codeOfOp){
     assert(operation);
     assert(codeOfOp);
+
         if(strcmp(operation, "PUSH") == 0){
             *codeOfOp = PUSH;
         }
@@ -381,7 +392,18 @@ void processOperWithArg(const char* stringOper, int* argument, char* operation){
     }
 }
 
-void processCountWordsInOper(){
-
+bool strIsWithoutOperations(const char* str){
+    assert(str);
+    
+    size_t lenOfStr = strlen(str);
+    bool without = true; 
+    for(size_t i = 0; i < lenOfStr; i++){
+        if((str[i] >= '0' && str[i] <= '9') || 
+           (str[i] >= 'a' && str[i] <= 'z') ||
+           (str[i] >= 'A' && str[i] <= 'Z')){
+                without = false;
+          }
+    }
+    return without;
 }
 
