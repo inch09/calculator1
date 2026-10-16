@@ -27,7 +27,12 @@ int main(){
 
     while(true){
         char str[20] = {};
-        fgets(str, sizeof(str), fileIn);
+        char* strPtr = fgets(str, sizeof(str), fileIn);
+
+        if(strPtr == NULL){
+            return 0;
+        }
+
         deleteLastEnter(str);
 
         int codeOfOperation = -10;
@@ -66,6 +71,8 @@ int main(){
             GET_OPERATION(JNE);
             GET_OPERATION(TAG);
             GET_OPERATION(IN);
+            GET_OPERATION(CALL);
+            GET_OPERATION(RET);
             GET_OPERATION(OUT);
             GET_OPERATION(HLT);
             GET_OPERATION(DEFAULT);
@@ -98,9 +105,6 @@ int main(){
             }
         }
 
-        if(codeOfOperation == HLT){
-            return 0;
-        }
         fprintf(fileOut, "\n");
     }
     fclose(fileIn);

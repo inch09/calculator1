@@ -22,6 +22,7 @@ struct Processor{
     int* code;
     size_t countOfCommands;
     int indOfOper;
+    Stack_t stackOfRetTags;
 };
 
 #define DUMP stackDump(LOG_FILE, &stack);
@@ -201,8 +202,18 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
                 printf("error enter\n");
                 return COMPLETION;
             }
-        }
-
+        }    
+        
+        case CALL:
+            stackPush(&processor->stackOfRetTags, processor->indOfOper + 2);
+            processor->indOfOper = processor->code[processor->indOfOper + 1];
+            printf("CALL, ind of oper = %d", processor->indOfOper);
+            return JUMP;
+        
+        case RET:
+            processor->indOfOper = stackPop(&processor->stackOfRetTags);
+            return JUMP;    
+    
         case OUT:
             //printf("out\n");
             elem = stackPop(stack);
@@ -236,6 +247,9 @@ void processorInit(Processor* processor){
     processor->code = (int*) calloc(200, sizeof(processor->code[0]));
     assert(processor->code);
     processor->countOfCommands = 0;
+
+    processor->stackOfRetTags = {};
+    stackInit(&processor->stackOfRetTags, 10);
     
 }
 

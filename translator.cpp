@@ -6,7 +6,7 @@
 #include "operations.h"
 
 
-#define FILE_TO_BE_TRANSLATION "test12.txt"
+#define FILE_TO_BE_TRANSLATION "test13.txt"
 #define FILE_WITH_TRANSLATION_RESULT "code.txt"
 
 void deleteLastEnter(char* str);
@@ -164,6 +164,13 @@ int main(){
             argument1 = getNumOfTag(str);
             //printf("getN = %d\n", getNumOfTag(operation));
             //argument1 = arrOfTags[getNumOfTag(operation) - 1];        
+        }
+        else if(strcmp(operation, "CALL") == 0){
+            codeOfOperation = CALL;
+            argument1 = arrOfTags[argument1 - 1];
+        }
+        else if(strcmp(operation, "RET") == 0){
+            codeOfOperation = RET;
         }
 
 
