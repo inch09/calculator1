@@ -5,31 +5,194 @@
 #include <math.h>
 #include "operations.h"
 
+struct Tag{
+    char nameOfTag[10]; 
+    size_t indOfOper;
+}
 
-#define FILE_TO_BE_TRANSLATION "test13.txt"
+#define FILE_TO_BE_TRANSLATION "test13.txt"//comand string
 #define FILE_WITH_TRANSLATION_RESULT "code.txt"
 
+void firstAssemPass(FILE* fileIn, int* arrOfTags);
+void secondAssemPass(FILE* fileIn, FILE* fileOut, int* arrOfTags);
+
 void deleteLastEnter(char* str);
+
 size_t countOfWords(const char* str);
 size_t countOfStringsInFile(FILE* file);
 bool strIsNumber(const char* str);
 void strCpyWithSameLength(char* strCopyTo, char* strCopyFrom);
+
 int getNumOfTag(const char* operationWithTag);
 void assemblingJumps(const char* operation, int* argument, TypeOfOperation* typeOp, int* arrOfTags);
 
 int main(){
-    int arrOfTags[20] = {};
+    Tag arrOfTags[20] = {};
 
-    int indOfOper = 0;
-    int indOfOperInCode = 0;
     FILE* fileIn = fopen(FILE_TO_BE_TRANSLATION, "r");
     FILE* fileOut = fopen(FILE_WITH_TRANSLATION_RESULT, "w");
 
     assert(fileIn);
     assert(fileOut);
 
+    firstAssemPass(fileIn, arrOfTags);
+    rewind(fileIn);
+
+    // for(size_t i = 0; i < 20; i++){
+    //     printf("%d ", arrOfTags[i]);
+    // }
+
+    secondAssemPass(fileIn, fileOut, arrOfTags);
+        
+    fclose(fileIn);
+    fclose(fileOut);
+
+    // for(size_t i = 0; i < 20; i++){
+    //     printf("%d ", arrOfTags[i]);
+    // }
+}
+
+void deleteLastEnter(char* str){
+    size_t lenOfStr = strlen(str);
+    if (str[lenOfStr - 1] == '\n'){
+        str[lenOfStr- 1] = '\0';
+    }
+}
+
+size_t countOfWords(const char* str){
+    size_t count = 1;
+    size_t lenOfStr = strlen(str);
+
+    for(size_t i = 0; i < lenOfStr; i++){
+        if(str[i] == ' '){
+            count++;
+        }
+    }
+    return count;
+}
+
+size_t countOfStringsInFile(FILE* file){
+    assert(file);
+    
+    size_t count = 1;
+
     while(true){
-        char str[20] = {};
+        char symbol = fgetc(file);
+        if(symbol == EOF){
+            rewind(file);
+            return count;
+        }
+        if(symbol == '\n'){
+            count++;
+        }
+    }
+
+    rewind(file);
+    return count;
+}
+
+bool strIsNumber(const char* str){
+    assert(str);
+
+    size_t ind = 0;
+    if(str[ind] == '-' /*|| str[ind] == "+"*/){
+        ind++;
+        if(str[1] == '\0'){
+            return false;
+        }
+    }
+
+    size_t lenOfStr = strlen(str);
+    for(;ind < lenOfStr; ind++){
+        if(str[ind] >= '0' && str[ind] <= '9'){
+            continue;
+        }
+        else{
+            return false;
+        }
+    }
+
+    return true;
+}
+
+//strlen fix
+void strCpyWithSameLength(char* strCopyTo, char* strCopyFrom){
+    assert(strCopyTo);
+    assert(strCopyFrom);
+
+    size_t strCopyFromLen = strlen(strCopyFrom);
+    size_t strCopyToLen = strlen(strCopyTo);
+
+    for(size_t i = 0; i < strCopyFromLen; i++){
+        strCopyTo[i] = strCopyFrom[i];
+    }
+    assert(strCopyFromLen == strCopyToLen);
+}
+
+int getNumOfTag(const char* operationWithTag){
+    int numOfTag = -1;
+
+    char* strNumOfTag = (char*) calloc(strlen(operationWithTag), sizeof(char));
+    assert(strNumOfTag);
+
+    size_t operationWithTagLen = strlen(operationWithTag);
+
+    for(size_t i = 0; i < operationWithTagLen - 1; i++){
+        assert(i + 1 < operationWithTagLen);
+        assert(operationWithTag[i + 1] >= '0' && operationWithTag[i + 1] <= '9');
+
+        strNumOfTag[i] = operationWithTag[i + 1];
+    }
+
+    int c = sscanf(strNumOfTag, "%d", &numOfTag);
+    free(strNumOfTag);
+    assert(c);
+
+    return numOfTag;
+}
+
+void assemblingJumps(const char* operation, int* argument, TypeOfOperation* typeOp, int* arrOfTags){
+    assert(operation);
+    assert(argument);
+    assert(typeOp);
+    assert(arrOfTags);    
+    
+    if(strcmp(operation, "JMP") == 0){
+        *typeOp = JMP;
+    }
+    else if(strcmp(operation, "JA") == 0){
+        *typeOp = JA;
+    }
+    else if(strcmp(operation, "JAE") == 0){
+        *typeOp = JAE;
+    }
+    else if(strcmp(operation, "JB") == 0){
+        *typeOp = JB;
+    }
+    else if(strcmp(operation, "JBE") == 0){
+        *typeOp = JBE;
+    }
+    else if(strcmp(operation, "JE") == 0){
+        *typeOp = JE;
+    }
+    else if(strcmp(operation, "JNE") == 0){
+        *typeOp = JNE;
+    }
+    else{
+        return;
+    }
+
+    *argument = arrOfTags[*argument - 1];
+
+}
+
+void firstAssemPass(FILE* fileIn, int* arrOfTags){
+    assert(fileIn);
+
+    int indOfOperInCode = 0;
+
+    while(true){
+    char str[20] = {};
         char* strptr = fgets(str, sizeof(str), fileIn);
         if(strptr == NULL){
             indOfOperInCode = 0;
@@ -39,7 +202,7 @@ int main(){
 
         int argument1 = 0;
 
-        if(str[0] == ':'){
+        if(str[0] == ':'){//func with tag
             argument1 = getNumOfTag(str);
             arrOfTags[argument1 - 1] = indOfOperInCode + 2;  
             indOfOperInCode += 2;
@@ -54,15 +217,11 @@ int main(){
             indOfOperInCode += 2;
         }
     }
+}
 
-        for(size_t i = 0; i < 20; i++){
-        printf("%d ", arrOfTags[i]);
-    }
-
-        rewind(fileIn);
-
-        while(true){
-
+void secondAssemPass(FILE* fileIn, FILE* fileOut, int* arrOfTags){
+    int indOfOper = 0;
+       while(true){
 
         char str[20] = {};
         char* strptr = fgets(str, sizeof(str), fileIn);
@@ -183,131 +342,4 @@ int main(){
         fprintf(fileOut, "\n");
         indOfOper++;
     }
-
-    fclose(fileIn);
-    fclose(fileOut);
-
-    for(size_t i = 0; i < 20; i++){
-        printf("%d ", arrOfTags[i]);
-    }
-}
-
-void deleteLastEnter(char* str){
-    if(str[strlen(str) - 1] == '\n'){
-        str[strlen(str)- 1] = '\0';
-    }
-}
-
-size_t countOfWords(const char* str){
-    size_t count = 1;
-    for(size_t i = 0; i < strlen(str); i++){
-        if(str[i] == ' '){
-            count++;
-        }
-    }
-    return count;
-}
-
-size_t countOfStringsInFile(FILE* file){
-    assert(file);
-    
-    size_t count = 1;
-
-    while(true){
-        char symbol = fgetc(file);
-        if(symbol == EOF){
-            rewind(file);
-            return count;
-        }
-        if(symbol == '\n'){
-            count++;
-        }
-    }
-
-    rewind(file);
-    return count;
-}
-
-bool strIsNumber(const char* str){
-    assert(str);
-
-    size_t ind = 0;
-    if(str[ind] == '-' /*|| str[ind] == "+"*/){
-        ind++;
-        if(strlen(str) == 1){
-            return false;
-        }
-    }
-
-    for(;ind < strlen(str); ind++){
-        if(str[ind] >= '0' && str[ind] <= '9'){
-            continue;
-        }
-        else{
-            return false;
-        }
-    }
-
-    return true;
-}
-
-void strCpyWithSameLength(char* strCopyTo, char* strCopyFrom){
-    for(size_t i = 0; i < strlen(strCopyFrom); i++){
-        strCopyTo[i] = strCopyFrom[i];
-    }
-    assert(strlen(strCopyFrom) == strlen(strCopyTo));
-}
-
-int getNumOfTag(const char* operationWithTag){
-    int numOfTag = -1;
-    // printf("%d, %s\n", strlen(operationWithTag) ,operationWithTag);
-    char* strNumOfTag = (char*) calloc(strlen(operationWithTag), sizeof(char));
-    //printf("strlen  = %d\n", strlen(strNumOfTag));
-    assert(strNumOfTag);
-    for(size_t i = 0; i < strlen(operationWithTag) - 1; i++){
-        //printf("uraaa\n");
-        assert(i + 1 < strlen(operationWithTag));
-        assert(operationWithTag[i + 1] >= '0' && operationWithTag[i + 1] <= '9');
-        strNumOfTag[i] = operationWithTag[i + 1];
-    }
-    int c = sscanf(strNumOfTag, "%d", &numOfTag);
-    free(strNumOfTag);
-    assert(c);
-    //printf("numoftg = %d\n", numOfTag);
-    return numOfTag;
-}
-
-void assemblingJumps(const char* operation, int* argument, TypeOfOperation* typeOp, int* arrOfTags){
-    assert(operation);
-    assert(argument);
-    assert(typeOp);
-    assert(arrOfTags);    
-    
-    if(strcmp(operation, "JMP") == 0){
-        *typeOp = JMP;
-    }
-    else if(strcmp(operation, "JA") == 0){
-        *typeOp = JA;
-    }
-    else if(strcmp(operation, "JAE") == 0){
-        *typeOp = JAE;
-    }
-    else if(strcmp(operation, "JB") == 0){
-        *typeOp = JB;
-    }
-    else if(strcmp(operation, "JBE") == 0){
-        *typeOp = JBE;
-    }
-    else if(strcmp(operation, "JE") == 0){
-        *typeOp = JE;
-    }
-    else if(strcmp(operation, "JNE") == 0){
-        *typeOp = JNE;
-    }
-    else{
-        return;
-    }
-
-    *argument = arrOfTags[*argument - 1];
-
 }
