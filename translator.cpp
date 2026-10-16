@@ -50,9 +50,9 @@ int main(){
     firstAssemPass(fileIn, arrOfTags);
     rewind(fileIn);
 
-    // for(size_t i = 0; i < 20; i++){
-    //     printf("%d ", arrOfTags[i]);
-    // }
+    for(size_t i = 0; i < 20; i++){
+        printf("ind = %d, name = %s\n", arrOfTags[i].indOfOper, arrOfTags[i].name);
+    }
 
     secondAssemPass(fileIn, fileOut, arrOfTags);
         
@@ -180,6 +180,7 @@ void firstAssemPass(FILE* fileIn, Tag* arrOfTags){
             getNameOfTag(str, arrOfTags[indOfTag].name);
             arrOfTags[indOfTag].indOfOper = indOfOperInCode + 2;  
             indOfOperInCode += 2;
+            indOfTag++;
             continue;      
         }
 
@@ -271,10 +272,13 @@ void assembleJumps(const char* operation, int* argument, TypeOfOperation* typeOp
         return;
     }
 
+    char helpStr[15] = {};
     char nameOfTag[MAX_LENGTH_OF_TAG] = {};
-    getNameOfTag(operStr, nameOfTag);
+    sscanf(operStr, "%s %s", helpStr, nameOfTag);
+    //printf("name of tag = %s\n", nameOfTag);
 
     *argument = getIndOfTagByName(arrOfTags, nameOfTag);
+    printf("arg = %d, nameTag = %s\n", *argument, nameOfTag);
 
 }
 //-------------------------------------------------------------------------
@@ -334,8 +338,10 @@ void assembleTag(const char* operation, int* argument, TypeOfOperation* codeOfOp
         int ind = getIndOfTagByName(arrOfTags, nameOfTag);
         if(ind >= 0){
             *argument = ind;
+            printf("indexindex = %d", *argument);
         }
         else{
+            printf("%s\n", nameOfTag);
             assert(strcmp("THIS TAG IS NOT SEARCH" , " ") == 0);
         }
 
@@ -371,6 +377,7 @@ void processOperWithArg(const char* stringOper, int* argument, char* operation){
     char stringArg[15] = {}; 
 
     sscanf(stringOper, "%s %s", operation, stringArg);
+
 
     if(!strIsNumber(stringArg)){  
         if(strcmp(stringArg, "AX") == 0){
@@ -414,10 +421,12 @@ int getIndOfTagByName(Tag* arrOfTags, const char* nameTag){
 
     for(size_t i = 0; i < MAX_COUNT_OF_TAGS; i++){
         if(strcmp(nameTag, arrOfTags[i].name) == 0){
+            //printf("nameTag = %s, really tag = %s\n", nameTag, arrOfTags[i].name);
             indOfTag = arrOfTags[i].indOfOper;
             break;
         }
     }
+    //printf("ind = %d\n", indOfTag);
     return indOfTag;
 }
 

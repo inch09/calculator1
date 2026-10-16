@@ -1,17 +1,17 @@
 PUSH 1
 PUSH 2
-CALL 1
+CALL dd
 PUSH 2
-CALL 2
+CALL drqqfffd
 HLT
 
-:1
+:dd
 ADD
 PUSH 2
-CALL 2
+CALL drqqfffd
 OUT
 RET
 
-:2
+:drqqfffd
 MUL
 RET
