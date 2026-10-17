@@ -14,7 +14,7 @@ struct Tag{
 #define FILE_WITH_TRANSLATION_RESULT "code.txt"
 
 #define MAX_COUNT_OF_TAGS 20
-#define MAX_LENGTH_OF_TAG 10
+#define MAX_LENGTH_OF_TAG 20
 
 void firstAssemPass(FILE* fileIn, Tag* arrOfTags);
 void secondAssemPass(FILE* fileIn, FILE* fileOut, Tag* arrOfTags);
@@ -295,7 +295,7 @@ void assembleJumps(const char* operation, int* argument, TypeOfOperation* typeOp
 
     char helpStr[16] = "";
     char nameOfTag[MAX_LENGTH_OF_TAG + 1] = "";
-    sscanf(operStr, "%15s %10s", helpStr, nameOfTag);
+    sscanf(operStr, "%15s %20s", helpStr, nameOfTag);
     //printf("name of tag = %s\n", nameOfTag);
 
 

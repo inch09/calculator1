@@ -5,13 +5,116 @@ POPR BX
 IN
 POPR CX
 
-PSHR AX
-OUT
+CALL check_ax
 
-PSHR BX
-OUT
-
-PSHR CX
-OUT
-
+:end_prog
 HLT
+
+
+:calc_disc
+PSHR BX
+PSHR BX
+MUL
+PUSH 4
+PSHR AX
+PSHR CX
+MUL
+MUL
+SUB
+POPR DX
+RET
+
+:process_disc_val
+PSHR DX
+PUSH 0
+JA calc_two_solves
+PSHR DX
+PUSH 0
+JE calc_one_solve
+JUMP zero_sol
+OUT
+RET
+
+:calc_two_solves
+PSHR BX
+PUSH -1
+MUL
+PSHR DX
+SQRT
+SUB
+PUSH 2
+PSHR AX
+MUL
+DIV
+OUT
+PSHR BX
+PUSH -1
+MUL
+PSHR DX
+SQRT
+ADD
+PUSH 2
+PSHR AX
+MUL
+DIV
+OUT
+JMP end_prog
+RET
+
+:calc_one_solve
+PSHR BX
+PUSH -1
+MUL
+PUSH 2
+PSHR AX
+MUL
+DIV
+OUT
+JMP end_prog
+RET
+
+:calc_linear_eq
+PSHR CX
+PUSH -1
+MUL
+PSHR BX
+DIV
+OUT
+JMP end_prog
+RET
+
+:check_ax
+PSHR AX
+PUSH 0
+JE check_bx
+CALL calc_disc
+CALL process_disc_val
+RET
+
+:check_bx
+PSHR BX
+PUSH 0
+JE check_cx
+CALL calc_linear_eq
+RET
+
+:check_cx
+PSHR CX
+PUSH 0
+JE inf_solves
+JMP zero_sol
+RET
+
+:inf_solves
+PUSH 6767
+OUT
+JMP end_prog
+RET
+
+:zero_sol
+PUSH -6767
+OUT
+JMP end_prog
+RET
+
+

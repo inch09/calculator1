@@ -207,7 +207,6 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
         case CALL:
             stackPush(&processor->stackOfRetTags, processor->indOfOper + 2);
             processor->indOfOper = processor->code[processor->indOfOper + 1];
-            printf("CALL, ind of oper = %d", processor->indOfOper);
             return JUMP;
         
         case RET:
