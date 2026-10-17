@@ -1,17 +1,17 @@
 PUSH 1
 PUSH 2
-CALL dd
+CALL slozh
 PUSH 2
-CALL drqqfffd
+CALL umn
 HLT
 
-:dd
+:slozh
 ADD
 PUSH 2
-CALL drqqfffd
+CALL umn
 OUT
 RET
 
-:drqqfffd
+:umn
 MUL
 RET

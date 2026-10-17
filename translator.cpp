@@ -34,7 +34,7 @@ int getIndOfTagByName(Tag* arrOfTags, const char* nameTag);
 
 void assembleJumps(const char* operation, int* argument, TypeOfOperation* typeOp, Tag* arrOfTags, char* operStr);
 void assembleFuncWithoutJmp(const char* operation, TypeOfOperation* codeOfOp);
-void assembleTag(const char* operation, int* argument, TypeOfOperation* codeOfOp, const char* str, Tag* arrOfTags);
+void assembleTag(int* argument, TypeOfOperation* codeOfOp, const char* str, Tag* arrOfTags);
 
 void printComandInFile(int countWord, int argument, TypeOfOperation* codeOfOp, FILE* fileOut);
 //-------------------------------------------------------------------------
@@ -50,7 +50,7 @@ int main(){
     firstAssemPass(fileIn, arrOfTags);
     rewind(fileIn);
 
-    for(size_t i = 0; i < 20; i++){
+    for(size_t i = 0; i < MAX_COUNT_OF_TAGS; i++){
         printf("ind = %d, name = %s\n", arrOfTags[i].indOfOper, arrOfTags[i].name);
     }
 
@@ -145,9 +145,10 @@ void getNameOfTag(const char* operationWithTag, char* nameOfTag){
     assert(operationWithTag);
 
     size_t operationWithTagLen = strlen(operationWithTag);
-    assert(operationWithTagLen <= MAX_LENGTH_OF_TAG + 1);
+    printf("oper withTag = %s, len = %d\n", operationWithTag, operationWithTagLen);
+    assert(operationWithTagLen <= 20);
 
-    for(size_t i = 0; i < operationWithTagLen - 1; i++){
+    for(size_t i = 0; i + 1 < operationWithTagLen; i++){
         assert(i + 1 < operationWithTagLen);
         nameOfTag[i] = operationWithTag[i + 1];
     }
@@ -155,13 +156,14 @@ void getNameOfTag(const char* operationWithTag, char* nameOfTag){
 //-------------------------------------------------------------------------
 void firstAssemPass(FILE* fileIn, Tag* arrOfTags){
     assert(fileIn);
+    assert(arrOfTags);
 
     int indOfOperInCode = 0;
     int indOfTag = 0;
 
     while(true){
 
-        const int maxLengthOfStrWithOper = 20; 
+        const int maxLengthOfStrWithOper = 30; 
         char str[maxLengthOfStrWithOper] = {};
         char* strptr = fgets(str, sizeof(str), fileIn);
         if(strptr == NULL){
@@ -195,10 +197,14 @@ void firstAssemPass(FILE* fileIn, Tag* arrOfTags){
 }
 //-------------------------------------------------------------------------
 void secondAssemPass(FILE* fileIn, FILE* fileOut, Tag* arrOfTags){
+    assert(fileIn);
+    assert(fileOut);
+    assert(arrOfTags);
+
     int indOfOper = 0;
        
     while(true){
-        const int maxLengthOfStrWithOper = 20; 
+        const int maxLengthOfStrWithOper = 30; 
         char str[maxLengthOfStrWithOper] = {};
         char* strptr = fgets(str, sizeof(str), fileIn);
         if(strptr == NULL){
@@ -211,14 +217,16 @@ void secondAssemPass(FILE* fileIn, FILE* fileOut, Tag* arrOfTags){
             continue;
         }
 
-        const int maxLengthOfOper = 7;
+        const int maxLengthOfOper = 31;
         char operation[maxLengthOfOper] = {};
         int argument = 0;
         TypeOfOperation codeOfOperation = DEFAULT;
         
         size_t countWord = countOfWords(str);
         if(countWord == 1){
+           // printf("beforeScanf = <%s>\n", str);
             sscanf(str, "%s", operation);
+            //printf("afterScanf = <%s>\n", str);
         }
         else if(countWord == 2){
             processOperWithArg(str, &argument, operation);
@@ -226,7 +234,7 @@ void secondAssemPass(FILE* fileIn, FILE* fileOut, Tag* arrOfTags){
 
         assembleJumps(operation, &argument, &codeOfOperation, arrOfTags, str);
         assembleFuncWithoutJmp(operation, &codeOfOperation);
-        assembleTag(operation, &argument, &codeOfOperation, str, arrOfTags);
+        assembleTag(&argument, &codeOfOperation, str, arrOfTags);
 
         printComandInFile(countWord, argument, &codeOfOperation, fileOut);
 
@@ -272,13 +280,19 @@ void assembleJumps(const char* operation, int* argument, TypeOfOperation* typeOp
         return;
     }
 
-    char helpStr[15] = {};
-    char nameOfTag[MAX_LENGTH_OF_TAG] = {};
-    sscanf(operStr, "%s %s", helpStr, nameOfTag);
+    // #define QUOTE2(var)  #var
+    // #define QUOTE(var)   QUOTE2 (var)
+    // sscanf(operStr, "%" QUOTE (MAX_LENGTH_OF_TAG) "s %s", helpStr, nameOfTag);
+
+    char helpStr[16] = "";
+    char nameOfTag[MAX_LENGTH_OF_TAG + 1] = "";
+    sscanf(operStr, "%15s %10s", helpStr, nameOfTag);
     //printf("name of tag = %s\n", nameOfTag);
 
+
+
     *argument = getIndOfTagByName(arrOfTags, nameOfTag);
-    printf("arg = %d, nameTag = %s\n", *argument, nameOfTag);
+    //printf("arg = %d, nameTag = %s\n", *argument, nameOfTag);
 
 }
 //-------------------------------------------------------------------------
@@ -325,23 +339,25 @@ void assembleFuncWithoutJmp(const char* operation, TypeOfOperation* codeOfOp){
 
 }
 //-------------------------------------------------------------------------
-void assembleTag(const char* operation, int* argument, TypeOfOperation* codeOfOp, const char* str, Tag* arrOfTags){
-    assert(operation);
+void assembleTag(int* argument, TypeOfOperation* codeOfOp, const char* str, Tag* arrOfTags){
     assert(argument);
     assert(codeOfOp);
     assert(str);
+
+    printf("str = %s\n", str);
     
-    if(operation[0] == ':'){
+    if(str[0] == ':'){
         *codeOfOp = TAG;
         char nameOfTag[MAX_LENGTH_OF_TAG] = {};
         getNameOfTag(str, nameOfTag);
+        printf("name = %s\n", nameOfTag);
         int ind = getIndOfTagByName(arrOfTags, nameOfTag);
         if(ind >= 0){
             *argument = ind;
-            printf("indexindex = %d", *argument);
+            printf("indexindex = %d\n", *argument);
         }
         else{
-            printf("%s\n", nameOfTag);
+            printf("ghhgghhghg =  %s\n", nameOfTag);
             assert(strcmp("THIS TAG IS NOT SEARCH" , " ") == 0);
         }
 
@@ -354,6 +370,7 @@ void printComandInFile(int countWord, int argument, TypeOfOperation* codeOfOp, F
     
     if(countWord == 1){
         if(*codeOfOp == TAG){
+            printf("taggggg\n");
             fprintf(fileOut, "%d", *codeOfOp);
             fprintf(fileOut, " %d", argument);
         }
@@ -374,7 +391,7 @@ void processOperWithArg(const char* stringOper, int* argument, char* operation){
     assert(argument);
     assert(operation);
 
-    char stringArg[15] = {}; 
+    char stringArg[30] = {}; 
 
     sscanf(stringOper, "%s %s", operation, stringArg);
 
