@@ -64,7 +64,7 @@ int main(){
 
     while(true){
         processorDump(&processor, PROCESSOR_LOG_FILE);
-        getchar();
+        //getchar();
         ActionWithProcess action = processOperation(&processor, &stack);
         if(action == COMPLETION){
             DUMP;

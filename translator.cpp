@@ -10,7 +10,7 @@ struct Tag{
     size_t indOfOper;
 };
 
-#define FILE_TO_BE_TRANSLATION "test13.txt"//comand string
+#define FILE_TO_BE_TRANSLATION "quadratic.txt"//comand string
 #define FILE_WITH_TRANSLATION_RESULT "code.txt"
 
 #define MAX_COUNT_OF_TAGS 20
@@ -78,7 +78,15 @@ size_t countOfWords(const char* str){
 
     for(size_t i = 0; i < lenOfStr; i++){
         if(str[i] == ' '){
-            count++;
+            size_t t = i;
+            while(t < lenOfStr){
+                if((str[t] != ' ') && (str[t] != '\n') && (str[t] != '\0')){
+                    i = t;
+                    count++;
+                    break;
+                }
+                t++;
+            }
         }
     }
     return count;
@@ -223,6 +231,7 @@ void secondAssemPass(FILE* fileIn, FILE* fileOut, Tag* arrOfTags){
         TypeOfOperation codeOfOperation = DEFAULT;
         
         size_t countWord = countOfWords(str);
+        printf("str = %s, countword = %d\n", str, countWord);
         if(countWord == 1){
            // printf("beforeScanf = <%s>\n", str);
             sscanf(str, "%s", operation);
@@ -370,7 +379,6 @@ void printComandInFile(int countWord, int argument, TypeOfOperation* codeOfOp, F
     
     if(countWord == 1){
         if(*codeOfOp == TAG){
-            printf("taggggg\n");
             fprintf(fileOut, "%d", *codeOfOp);
             fprintf(fileOut, " %d", argument);
         }
@@ -379,6 +387,7 @@ void printComandInFile(int countWord, int argument, TypeOfOperation* codeOfOp, F
         }    
     }    
     else if(countWord == 2){
+        printf("oper = %d\n", *codeOfOp);
         fprintf(fileOut, "%d", *codeOfOp);
         fprintf(fileOut, " %d", argument);
     }
