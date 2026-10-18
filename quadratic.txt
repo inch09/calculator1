@@ -37,7 +37,7 @@ JA calc_two_solves
 PSHR DX
 PUSH 0
 JE calc_one_solve
-JUMP zero_sol
+JMP zero_sol
 OUT
 RET
 
