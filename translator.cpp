@@ -5,7 +5,7 @@
 #include <math.h>
 #include "operations.h"
 
-#define FILE_TO_BE_TRANSLATION "quadratic.txt"//comand string
+#define FILE_TO_BE_TRANSLATION "testRam.txt"//comand string
 #define FILE_WITH_TRANSLATION_RESULT "code.txt"
 
 #define MAX_COUNT_OF_TAGS 20
@@ -73,7 +73,10 @@ void deleteLastEnter(char* str){
 }
 //-------------------------------------------------------------------------
 size_t countOfWords(const char* str){
-    size_t count = 1;
+    size_t count = 0;
+    if((str[0] != ' ') && (str[0] != '\n') && (str[0] != '\0')){
+        count++;
+    }
     size_t lenOfStr = strlen(str);
 
     for(size_t i = 0; i < lenOfStr; i++){
@@ -336,6 +339,12 @@ void assembleFuncWithoutJmp(const char* operation, TypeOfOperation* codeOfOp){
         else if(strcmp(operation, "PSHR") == 0){
             *codeOfOp = PSHR;
         }
+        else if(strcmp(operation, "POPM") == 0){
+            *codeOfOp = POPM;
+        }
+        else if(strcmp(operation, "PSHM") == 0){
+            *codeOfOp = PSHM;
+        }
         else if(strcmp(operation, "IN") == 0){
             *codeOfOp = IN;
         }
@@ -406,16 +415,20 @@ void processOperWithArg(const char* stringOper, int* argument, char* operation){
 
 
     if(!strIsNumber(stringArg)){  
-        if(strcmp(stringArg, "AX") == 0){
+        if(strcmp(stringArg, "AX") == 0 ||
+           strcmp(stringArg, "[AX]") == 0){
             *argument = 1;
         }
-        else if(strcmp(stringArg, "BX") == 0){
+        else if(strcmp(stringArg, "BX") == 0 ||
+                strcmp(stringArg, "[BX]") == 0){
             *argument = 2;
         }
-        else if(strcmp(stringArg, "CX") == 0){
+        else if(strcmp(stringArg, "CX") == 0 ||
+                strcmp(stringArg, "[CX]") == 0){
             *argument = 3;
         }
-        else if(strcmp(stringArg, "DX") == 0){
+        else if(strcmp(stringArg, "DX") == 0 ||
+                strcmp(stringArg, "[DX]") == 0){
             *argument = 4;
         }
     }

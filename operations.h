@@ -23,6 +23,8 @@ enum TypeOfOperation{
     IN,
     CALL,
     RET,
+    PSHM,
+    POPM,
     OUT,
     HLT,
     DEFAULT,

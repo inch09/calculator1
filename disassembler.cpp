@@ -100,6 +100,20 @@ int main(){
                     fprintf(fileOut, "DX");
                 }
             }
+            else if(codeOfOperation == PSHM || codeOfOperation == POPM){
+                if(isEqual(argument, 1)){
+                    fprintf(fileOut, "[AX]");
+                }
+                else if(isEqual(argument, 2)){
+                    fprintf(fileOut, "[BX]");
+                }
+                else if(isEqual(argument, 3)){
+                    fprintf(fileOut, "[CX]");
+                }
+                else if(isEqual(argument, 4)){
+                    fprintf(fileOut, "[DX]");
+                }
+            }
             else{
                 fprintf(fileOut, "%s %lf", strOperation, argument);
             }

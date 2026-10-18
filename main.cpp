@@ -7,6 +7,9 @@
 #include "operations.h"
 #include "stack.h"
 
+#define MAX_LENGTH_OF_ARR_CODE 200
+#define SIZE_OF_RAM 100
+
 #define FILE_WITH_CODE "code.txt"
 #define PROCESSOR_LOG_FILE "processor.log"
 
@@ -18,11 +21,12 @@ enum ActionWithProcess{
 };
 
 struct Processor{
-    double registers[4];
+    int registers[4];
     int* code;
     size_t countOfCommands;
     int indOfOper;
     Stack_t stackOfRetTags;
+    int* ram;
 };
 
 #define DUMP stackDump(LOG_FILE, &stack);
@@ -30,6 +34,8 @@ struct Processor{
 void processorInit(Processor* processor);
 int fillCodeArr(Processor* processor, const char* fileWithCode);
 void processorDump(Processor* processor, const char* processorLogFile);
+void dumpRam(Processor* processor);
+
 
 void binaryOperation(Stack_t* stk, TypeOfOperation operation);
 void unaryOperation(Stack_t* stack, TypeOfOperation operation);
@@ -39,6 +45,10 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack);
 ActionWithProcess processJump(int typeOfOperation, Stack_t* stack, Processor* processor);
 void processPshr(int argument, Processor* processor, Stack_t* stack);
 void processPopr(int argument, Processor* processor, Stack_t* stack);
+void processPshm(int argument, Processor* processor, Stack_t* stack);
+void processPopm(int argument, Processor* processor, Stack_t* stack);
+
+
 
 void deleteLastEnter(char* str);
 
@@ -69,12 +79,14 @@ int main(){
         if(action == COMPLETION){
             DUMP;
             processor.indOfOper = 0;
+            dumpRam(&processor);
             break;
         }
         
     }
     
-    free(processor.code);
+    free(processor.code);//napisat destroy
+    free(processor.ram);
     fclose(filePtr);
     
     return 0;
@@ -176,13 +188,26 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
             //printf("popr\n");
             processPopr(processor->code[processor->indOfOper + 1], processor, stack);
             processor->indOfOper += 2;
-            return CONTINUATION;    
+            return CONTINUATION;        
         
         case PSHR:
             //printf("pshr\n");
             processPshr(processor->code[processor->indOfOper + 1], processor, stack);
             processor->indOfOper += 2;
             return CONTINUATION; 
+
+        case POPM:
+            //printf("popr\n");
+            processPopm(processor->code[processor->indOfOper + 1], processor, stack);
+            processor->indOfOper += 2;
+            return CONTINUATION;        
+        
+        case PSHM:
+            //printf("pshr\n");
+            processPshm(processor->code[processor->indOfOper + 1], processor, stack);
+            processor->indOfOper += 2;
+            return CONTINUATION;     
+
 
         case TAG:{
             //printf("tag\n");
@@ -243,8 +268,12 @@ void processorInit(Processor* processor){
 
     processor->indOfOper = 0;
 
-    processor->code = (int*) calloc(200, sizeof(processor->code[0]));
+    processor->code = (int*) calloc(MAX_LENGTH_OF_ARR_CODE, sizeof(processor->code[0]));
     assert(processor->code);
+
+    processor->ram = (int*) calloc(SIZE_OF_RAM, sizeof(processor->ram[0]));
+    assert(processor->ram);
+
     processor->countOfCommands = 0;
 
     processor->stackOfRetTags = {};
@@ -294,6 +323,51 @@ void processPopr(int argument, Processor* processor, Stack_t* stack){
         processor->registers[3] = stackPop(stack);
     }
 }
+
+
+void processPshm(int argument, Processor* processor, Stack_t* stack){
+    assert(processor);
+    assert(stack);
+
+    if(isEqual(argument, 1)){
+        stackPush(stack, processor->ram[processor->registers[0]]);
+    }
+
+    else if(isEqual(argument, 2)){
+        stackPush(stack, processor->ram[processor->registers[1]]);
+    }
+
+    else if(isEqual(argument, 3)){
+        stackPush(stack, processor->ram[processor->registers[2]]);
+    }
+
+    else if(isEqual(argument, 4)){
+        stackPush(stack, processor->ram[processor->registers[3]]);
+    }
+}
+
+void processPopm(int argument, Processor* processor, Stack_t* stack){
+
+    assert(processor);
+    assert(stack);
+
+    if(isEqual(argument, 1)){
+        processor->ram[processor->registers[0]] = stackPop(stack);
+    }
+
+    else if(isEqual(argument, 2)){
+        processor->ram[processor->registers[1]] = stackPop(stack);
+    }
+
+    else if(isEqual(argument, 3)){
+        processor->ram[processor->registers[2]] = stackPop(stack);
+    }
+
+    else if(isEqual(argument, 4)){
+        processor->ram[processor->registers[3]] = stackPop(stack);
+    }
+}
+
 
 int fillCodeArr(Processor* processor, const char* fileWithCode){
     assert(processor);
@@ -432,4 +506,13 @@ void processorDump(Processor* processor, const char* processorLogFile){
     fprintf(prLogFile, "Current processor instruction: ");
     fclose(prLogFile);
 
+}
+
+
+void dumpRam(Processor* processor){
+    assert(processor);
+
+    for(size_t i = 0; i < SIZE_OF_RAM; i++){
+        printf("%d ", processor->ram[i]);
+    }
 }
