@@ -5,16 +5,16 @@
 #include <math.h>
 #include "operations.h"
 
-struct Tag{
-    char name[10]; 
-    size_t indOfOper;
-};
-
 #define FILE_TO_BE_TRANSLATION "quadratic.txt"//comand string
 #define FILE_WITH_TRANSLATION_RESULT "code.txt"
 
 #define MAX_COUNT_OF_TAGS 20
 #define MAX_LENGTH_OF_TAG 20
+
+struct Tag{
+    char name[MAX_LENGTH_OF_TAG + 1]; 
+    size_t indOfOper;
+};
 
 void firstAssemPass(FILE* fileIn, Tag* arrOfTags);
 void secondAssemPass(FILE* fileIn, FILE* fileOut, Tag* arrOfTags);
