@@ -1,0 +1,154 @@
+PUSH 17000
+POPR AX
+
+PUSH 1310
+POPR BX
+
+PUSH 0
+POPR CX
+
+PUSH 0
+POPR DX
+
+:cycle_1
+PUSH 1000
+PSHR CX
+ADD
+POPR CX
+PSHR CX
+PSHR AX
+JA end_program
+
+CALL cycle_2
+PUSH 0
+POPR DX
+
+JMP cycle_1
+
+
+:cycle_2
+PUSH 1000
+PSHR DX
+ADD
+POPR DX
+PSHR DX
+PSHR AX
+
+JA end_cycle_2
+
+CALL calc_distance
+
+JBE add_1
+JA add_0
+
+:add_1
+CALL add_1_in_ram
+JMP cycle_2
+
+:add_0
+CALL add_0_in_ram
+JMP cycle_2
+
+:end_cycle_2
+RET
+
+
+:end_program
+HLT
+RET
+
+:calc_radius
+PSHR AX
+PUSH 2
+DIV
+RET
+
+:calc_center
+PSHR AX
+PUSH 1000
+ADD
+PUSH 2
+DIV
+RET
+
+:calc_distance
+CALL calc_center
+PSHR DX
+SUB
+
+CALL calc_center
+PSHR DX
+SUB
+
+MUL
+
+CALL calc_center
+PSHR CX
+SUB
+
+CALL calc_center
+PSHR CX
+SUB
+
+MUL
+
+PSHR BX
+PSHR BX
+MUL
+MUL
+
+PUSH 1000000
+DIV
+
+ADD
+
+CALL calc_radius
+CALL calc_radius
+MUL
+
+RET
+
+
+:add_1_in_ram
+PSHR AX
+
+PSHR AX
+PSHR CX
+PUSH 1
+SUB
+MUL
+PSHR DX
+PUSH 1
+SUB
+ADD
+
+POPR AX
+PUSH 1
+
+POPM [AX]
+
+POPR AX
+RET
+
+
+
+:add_0_in_ram
+PSHR AX
+
+PSHR AX
+PSHR CX
+PUSH 1
+SUB
+MUL
+PSHR DX
+PUSH 1
+SUB
+ADD
+
+POPR AX
+PUSH 0
+
+POPM [AX]
+
+POPR AX
+RET

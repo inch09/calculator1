@@ -8,7 +8,7 @@
 #include "stack.h"
 
 #define MAX_LENGTH_OF_ARR_CODE 200
-#define SIZE_OF_RAM 100
+#define SIZE_OF_RAM 289
 
 #define FILE_WITH_CODE "code.txt"
 #define PROCESSOR_LOG_FILE "processor.log"
@@ -76,7 +76,7 @@ int main(){
 
     while(true){
         processorDump(&processor, PROCESSOR_LOG_FILE);
-        //getchar();
+        getchar();
         ActionWithProcess action = processOperation(&processor, &stack);
         if(action == COMPLETION){
             DUMP;

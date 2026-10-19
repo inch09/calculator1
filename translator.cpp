@@ -5,7 +5,7 @@
 #include <math.h>
 #include "operations.h"
 
-#define FILE_TO_BE_TRANSLATION "test16.txt"//comand string
+#define FILE_TO_BE_TRANSLATION "drawCircle.txt"//comand string
 #define FILE_WITH_TRANSLATION_RESULT "code.txt"
 
 #define MAX_COUNT_OF_TAGS 20
