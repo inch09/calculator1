@@ -1,4 +1,4 @@
-PUSH 17000
+PUSH 7000
 POPR AX
 
 PUSH 1310
@@ -9,6 +9,9 @@ POPR CX
 
 PUSH 0
 POPR DX
+
+CALL cycle_1
+HLT
 
 :cycle_1
 PUSH 1000
@@ -37,8 +40,9 @@ PSHR AX
 JA end_cycle_2
 
 CALL calc_distance
-
 JBE add_1
+
+CALL calc_distance
 JA add_0
 
 :add_1
@@ -55,7 +59,6 @@ RET
 
 :end_program
 HLT
-RET
 
 :calc_radius
 PSHR AX
@@ -69,6 +72,7 @@ PUSH 1000
 ADD
 PUSH 2
 DIV
+OUT
 RET
 
 :calc_distance
@@ -92,19 +96,21 @@ SUB
 
 MUL
 
-PSHR BX
-PSHR BX
-MUL
-MUL
-
 PUSH 1000000
 DIV
 
+PSHR BX
+PSHR BX
+MUL
+MUL
+
 ADD
+OUT
 
 CALL calc_radius
 CALL calc_radius
 MUL
+OUT
 
 RET
 
@@ -114,14 +120,17 @@ PSHR AX
 
 PSHR AX
 PSHR CX
-PUSH 1
+PUSH 1000
 SUB
 MUL
+PUSH 1000
+DIV
 PSHR DX
-PUSH 1
+PUSH 1000
 SUB
 ADD
-
+PUSH 1000
+DIV
 POPR AX
 PUSH 1
 
@@ -137,14 +146,17 @@ PSHR AX
 
 PSHR AX
 PSHR CX
-PUSH 1
+PUSH 1000
 SUB
 MUL
+PUSH 1000
+DIV
 PSHR DX
-PUSH 1
+PUSH 1000
 SUB
 ADD
-
+PUSH 1000
+DIV
 POPR AX
 PUSH 0
 

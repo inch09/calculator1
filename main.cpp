@@ -7,8 +7,8 @@
 #include "operations.h"
 #include "stack.h"
 
-#define MAX_LENGTH_OF_ARR_CODE 200
-#define SIZE_OF_RAM 289
+#define MAX_LENGTH_OF_ARR_CODE 500
+#define SIZE_OF_RAM 49
 
 #define FILE_WITH_CODE "code.txt"
 #define PROCESSOR_LOG_FILE "processor.log"
@@ -76,12 +76,15 @@ int main(){
 
     while(true){
         processorDump(&processor, PROCESSOR_LOG_FILE);
-        getchar();
+        dumpRam(&processor);
+        printf("\n\n");
+        stackDump("stack.log", &stack);
+        //getchar();
         ActionWithProcess action = processOperation(&processor, &stack);
         if(action == COMPLETION){
             DUMP;
             processor.indOfOper = 0;
-            dumpRam(&processor);
+            printf("end";)
             break;
         }
         

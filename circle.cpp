@@ -12,7 +12,7 @@ struct Point{
 int main(){
     FILE* file = fopen("circle.txt", "w");
     assert(file);
-    const size_t side = 15;
+    const size_t side = 7;
     const double scaleCoeff = 1.31;
     const size_t sideLenX = side;
     const size_t sideLenY = side;//sideLenX / scaleCoeff + 1;
