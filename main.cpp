@@ -48,6 +48,8 @@ void processPopr(int argument, Processor* processor, Stack_t* stack);
 void processPshm(int argument, Processor* processor, Stack_t* stack);
 void processPopm(int argument, Processor* processor, Stack_t* stack);
 
+void drawSquareRam();
+
 
 
 void deleteLastEnter(char* str);
@@ -244,6 +246,11 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
             printf(SPECIFIER, elem);
             printf("\n");
             stackPush(stack, elem);
+            processor->indOfOper += 1;
+            return CONTINUATION;
+        
+        case DRAW:
+            drawSquareRam();
             processor->indOfOper += 1;
             return CONTINUATION;
         
@@ -516,3 +523,15 @@ void dumpRam(Processor* processor){
         printf("%d ", processor->ram[i]);
     }
 }
+
+
+void drawSquareRam(){
+
+}
+
+// void drawCircle(Processor* processor){
+//     assert(processor);
+
+
+
+// }

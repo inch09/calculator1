@@ -72,6 +72,7 @@ int main(){
             GET_OPERATION(TAG);
             GET_OPERATION(IN);
             GET_OPERATION(CALL);
+            GET_OPERATION(DRAW);
             GET_OPERATION(RET);
             GET_OPERATION(OUT);
             GET_OPERATION(HLT);

@@ -5,7 +5,7 @@
 #include <math.h>
 #include "operations.h"
 
-#define FILE_TO_BE_TRANSLATION "testRam.txt"//comand string
+#define FILE_TO_BE_TRANSLATION "test16.txt"//comand string
 #define FILE_WITH_TRANSLATION_RESULT "code.txt"
 
 #define MAX_COUNT_OF_TAGS 20
@@ -344,6 +344,9 @@ void assembleFuncWithoutJmp(const char* operation, TypeOfOperation* codeOfOp){
         }
         else if(strcmp(operation, "PSHM") == 0){
             *codeOfOp = PSHM;
+        }
+        else if(strcmp(operation, "DRAW") == 0){
+            *codeOfOp = DRAW;
         }
         else if(strcmp(operation, "IN") == 0){
             *codeOfOp = IN;

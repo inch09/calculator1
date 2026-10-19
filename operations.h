@@ -25,6 +25,7 @@ enum TypeOfOperation{
     RET,
     PSHM,
     POPM,
+    DRAW,
     OUT,
     HLT,
     DEFAULT,
