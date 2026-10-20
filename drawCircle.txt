@@ -1,4 +1,4 @@
-PUSH 7000
+PUSH 11000
 POPR AX
 
 PUSH 1310
@@ -58,6 +58,8 @@ RET
 
 
 :end_program
+IN
+DRAW
 HLT
 
 :calc_radius
@@ -72,7 +74,6 @@ PUSH 1000
 ADD
 PUSH 2
 DIV
-OUT
 RET
 
 :calc_distance
@@ -105,12 +106,10 @@ MUL
 MUL
 
 ADD
-OUT
 
 CALL calc_radius
 CALL calc_radius
 MUL
-OUT
 
 RET
 

@@ -8,7 +8,7 @@
 #include "stack.h"
 
 #define MAX_LENGTH_OF_ARR_CODE 500
-#define SIZE_OF_RAM 49
+#define SIZE_OF_RAM 121
 
 #define FILE_WITH_CODE "code.txt"
 #define PROCESSOR_LOG_FILE "processor.log"
@@ -48,7 +48,7 @@ void processPopr(int argument, Processor* processor, Stack_t* stack);
 void processPshm(int argument, Processor* processor, Stack_t* stack);
 void processPopm(int argument, Processor* processor, Stack_t* stack);
 
-void drawSquareRam();
+void drawSquareRam(Processor* processor);
 
 
 
@@ -76,15 +76,14 @@ int main(){
 
     while(true){
         processorDump(&processor, PROCESSOR_LOG_FILE);
-        dumpRam(&processor);
-        printf("\n\n");
         stackDump("stack.log", &stack);
         //getchar();
         ActionWithProcess action = processOperation(&processor, &stack);
         if(action == COMPLETION){
             DUMP;
             processor.indOfOper = 0;
-            printf("end";)
+            dumpRam(&processor);
+            printf("end");
             break;
         }
         
@@ -253,7 +252,7 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
             return CONTINUATION;
         
         case DRAW:
-            drawSquareRam();
+            drawSquareRam(processor);
             processor->indOfOper += 1;
             return CONTINUATION;
         
@@ -528,8 +527,20 @@ void dumpRam(Processor* processor){
 }
 
 
-void drawSquareRam(){
+void drawSquareRam(Processor* processor){
+    assert(processor);
 
+    for(size_t y = 1; y <= 11; y++){
+        for(size_t x = 1; x <= 11; x++){
+            if(processor->ram[11 * (y - 1) + x - 1] == 1){
+                printf("# ");
+            }
+            else{
+                printf(". ");
+            }
+        }
+        printf("\n");
+    }
 }
 
 // void drawCircle(Processor* processor){
