@@ -8,7 +8,7 @@
 #include "stack.h"
 
 #define MAX_LENGTH_OF_ARR_CODE 500
-#define SIZE_OF_RAM 121
+#define SIZE_OF_RAM 1681
 
 #define FILE_WITH_CODE "code.txt"
 #define PROCESSOR_LOG_FILE "processor.log"
@@ -75,8 +75,8 @@ int main(){
     // }
 
     while(true){
-        processorDump(&processor, PROCESSOR_LOG_FILE);
-        stackDump("stack.log", &stack);
+        //processorDump(&processor, PROCESSOR_LOG_FILE);
+        //stackDump("stack.log", &stack);
         //getchar();
         ActionWithProcess action = processOperation(&processor, &stack);
         if(action == COMPLETION){
@@ -530,9 +530,9 @@ void dumpRam(Processor* processor){
 void drawSquareRam(Processor* processor){
     assert(processor);
 
-    for(size_t y = 1; y <= 11; y++){
-        for(size_t x = 1; x <= 11; x++){
-            if(processor->ram[11 * (y - 1) + x - 1] == 1){
+    for(size_t y = 1; y <= (int) sqrt(SIZE_OF_RAM); y++){
+        for(size_t x = 1; x <= (int) sqrt(SIZE_OF_RAM); x++){
+            if(processor->ram[(int) sqrt(SIZE_OF_RAM) * (y - 1) + x - 1] == 1){
                 printf("# ");
             }
             else{
