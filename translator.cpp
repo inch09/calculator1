@@ -38,10 +38,19 @@ void assembleTag(int* argument, TypeOfOperation* codeOfOp, const char* str, Tag*
 
 void printComandInFile(int countWord, int argument, TypeOfOperation* codeOfOp, FILE* fileOut);
 //-------------------------------------------------------------------------
-int main(){
+int main(int argc, char* argv[]){
+    char fileToTrans[30] = "";
+    if(argc > 1){
+        strcpy(fileToTrans, argv[1]);
+    }
+    else{
+        strcpy(fileToTrans, FILE_TO_BE_TRANSLATION);
+    }
+
+
     Tag arrOfTags[MAX_COUNT_OF_TAGS] = {};
 
-    FILE* fileIn = fopen(FILE_TO_BE_TRANSLATION, "r");
+    FILE* fileIn = fopen(fileToTrans, "r");
     FILE* fileOut = fopen(FILE_WITH_TRANSLATION_RESULT, "w");
 
     assert(fileIn);

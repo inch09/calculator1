@@ -8,7 +8,7 @@
 #include "stack.h"
 
 #define MAX_LENGTH_OF_ARR_CODE 500
-#define SIZE_OF_RAM 1681
+#define SIZE_OF_RAM 41*41
 
 #define FILE_WITH_CODE "code.txt"
 #define PROCESSOR_LOG_FILE "processor.log"
