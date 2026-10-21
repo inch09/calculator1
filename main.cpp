@@ -38,11 +38,13 @@ void processorDump(Processor* processor, const char* processorLogFile);
 void dumpRam(Processor* processor);
 
 
-void binaryOperation(Stack_t* stk, TypeOfOperation operation);
-void unaryOperation(Stack_t* stack, TypeOfOperation operation);
+void binaryOperation(Stack_t* stack, int operation);
+void unaryOperation (Stack_t* stack, int operation);
 ActionWithProcess processOperation(Processor* processor, Stack_t* stack);
 
-ActionWithProcess processHtl(int typeofOperation);
+ActionWithProcess processUnOp(Processor* processor, Stack_t* stack, int typeOfOperation);
+ActionWithProcess processBinOp(Processor* processor, Stack_t* stack, int typeOfOperation);
+ActionWithProcess processHlt(int typeofOperation);
 ActionWithProcess processDraw(Processor* processor, int typeOfOperation);
 ActionWithProcess processCallAndRet(Processor* processor, int typeOfOperation);
 ActionWithProcess processTag(Processor* processor, int typeOfOperation);
@@ -98,7 +100,7 @@ int main(){
     return 0;
 }
 //----------------------------------------------------------------------------------
-void binaryOperation(Stack_t* stk, TypeOfOperation operation){
+void binaryOperation(Stack_t* stk, int operation){
     assert(stk);
 
     Stack_elem_t a = stackPop(stk);
@@ -130,7 +132,7 @@ void binaryOperation(Stack_t* stk, TypeOfOperation operation){
     }
 }
 //----------------------------------------------------------------------------------
-void unaryOperation(Stack_t* stack, TypeOfOperation operation){
+void unaryOperation(Stack_t* stack, int operation){
     assert(stack);
 
     Stack_elem_t a = stackPop(stack); 
@@ -150,18 +152,6 @@ void unaryOperation(Stack_t* stack, TypeOfOperation operation){
     
 }
 //----------------------------------------------------------------------------------
-#define processBinOp(typeOfOp)\
-    case typeOfOp:\
-        binaryOperation(stack, typeOfOp);\
-        processor->indOfOper += 1;\
-        return CONTINUATION;
-
-#define processUnOp(typeOfOp)\
-    case typeOfOp:\
-        unaryOperation(stack, typeOfOp);\
-        processor->indOfOper += 1;\
-        return CONTINUATION;
-
 
 ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
     
@@ -212,32 +202,28 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
         else{
             return act;
         }
-        act = processHlt(processor, typeOfOperation);
+        act = processHlt(typeOfOperation);
         if(act == DEFAULT_ACT){
         }
         else{
             return act;
         }
-
-        switch (typeOfOperation){
-
-        processBinOp(ADD);
-        processBinOp(SUB);
-        processBinOp(MUL);
-        processBinOp(DIV);
-        processUnOp(SIN);
-        processUnOp(SQRT); 
+        act = processBinOp(processor, stack, typeOfOperation);
+        if(act == DEFAULT_ACT){
+        }
+        else{
+            return act;
+        }
+        act = processUnOp(processor, stack, typeOfOperation);
+        if(act == DEFAULT_ACT){
+        }
+        else{
+            return act;
+        }
         
-
-        default:
-            processor->indOfOper += 1;
-            return CONTINUATION;     
-    }
     return COMPLETION;
 }
 
-#undef processBinOp
-#undef processUnOp
 //----------------------------------------------------------------------------------
 void processorInit(Processor* processor){
     assert(processor);
@@ -557,6 +543,9 @@ ActionWithProcess processPoprsAndPushes(Processor* processor, Stack_t* stack, in
 }
 //-----------------------------------------------------------------------------------------
 ActionWithProcess processInOutFunc(Processor* processor, Stack_t* stack, int typeOfOperation){
+    assert(processor);
+    assert(stack);
+
     if(typeOfOperation == IN){
         int argument = 0;
         int isOkArgument = scanf("%d", &argument);
@@ -584,6 +573,7 @@ ActionWithProcess processInOutFunc(Processor* processor, Stack_t* stack, int typ
 }
 //------------------------------------------------------------------------------------------------
 ActionWithProcess processTag(Processor* processor, int typeOfOperation){
+    assert(processor);
     if(typeOfOperation == TAG){
         processor->indOfOper += 2;
         return CONTINUATION;
@@ -594,6 +584,7 @@ ActionWithProcess processTag(Processor* processor, int typeOfOperation){
 }
 //------------------------------------------------------------------------------------------------
 ActionWithProcess processCallAndRet(Processor* processor, int typeOfOperation){
+    assert(processor);
     if(typeOfOperation == CALL){
         stackPush(&processor->stackOfRetTags, processor->indOfOper + 2);
         processor->indOfOper = processor->code[processor->indOfOper + 1];
@@ -609,6 +600,7 @@ ActionWithProcess processCallAndRet(Processor* processor, int typeOfOperation){
 }
 //------------------------------------------------------------------------------------------------
 ActionWithProcess processDraw(Processor* processor, int typeOfOperation){
+    assert(processor);
     if(typeOfOperation == DRAW){
         drawSquareRam(processor);
         processor->indOfOper += 1;
@@ -619,9 +611,36 @@ ActionWithProcess processDraw(Processor* processor, int typeOfOperation){
     }    
 }
 //------------------------------------------------------------------------------------------------
-ActionWithProcess processHtl(int typeofOperation){
+ActionWithProcess processHlt(int typeofOperation){
     if(typeofOperation == HLT){
         return COMPLETION;
+    }
+    else{
+        return DEFAULT_ACT;
+    }
+}
+//------------------------------------------------------------------------------------------------
+ActionWithProcess processBinOp(Processor* processor, Stack_t* stack, int typeOfOperation){
+    assert(processor);
+    assert(stack);
+    if(typeOfOperation == ADD || typeOfOperation == SUB ||
+       typeOfOperation == MUL || typeOfOperation == DIV){
+        binaryOperation(stack, typeOfOperation);
+        processor->indOfOper += 1;
+        return CONTINUATION;
+    }
+    else{
+        return DEFAULT_ACT;
+    }
+}
+//------------------------------------------------------------------------------------------------
+ActionWithProcess processUnOp(Processor* processor, Stack_t* stack, int typeOfOperation){
+    assert(processor);
+    assert(stack);
+    if(typeOfOperation == SIN || typeOfOperation == SQRT){
+        unaryOperation(stack, typeOfOperation);
+        processor->indOfOper += 1;
+        return CONTINUATION;
     }
     else{
         return DEFAULT_ACT;
