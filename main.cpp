@@ -42,6 +42,10 @@ void binaryOperation(Stack_t* stk, TypeOfOperation operation);
 void unaryOperation(Stack_t* stack, TypeOfOperation operation);
 ActionWithProcess processOperation(Processor* processor, Stack_t* stack);
 
+ActionWithProcess processHtl(int typeofOperation);
+ActionWithProcess processDraw(Processor* processor, int typeOfOperation);
+ActionWithProcess processCallAndRet(Processor* processor, int typeOfOperation);
+ActionWithProcess processTag(Processor* processor, int typeOfOperation);
 ActionWithProcess processInOutFunc(Processor* processor, Stack_t* stack, int typeOfOperation);
 ActionWithProcess processJump(int typeOfOperation, Stack_t* stack, Processor* processor);
 ActionWithProcess processPoprsAndPushes(Processor* processor, Stack_t* stack, int typeOfOperation);
@@ -189,6 +193,32 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
             return act;
         }
 
+        act = processTag(processor, typeOfOperation);
+        if(act == DEFAULT_ACT){
+        }
+        else{
+            return act;
+        }
+
+        act = processCallAndRet(processor, typeOfOperation);
+        if(act == DEFAULT_ACT){
+        }
+        else{
+            return act;
+        }
+        act = processDraw(processor, typeOfOperation);
+        if(act == DEFAULT_ACT){
+        }
+        else{
+            return act;
+        }
+        act = processHlt(processor, typeOfOperation);
+        if(act == DEFAULT_ACT){
+        }
+        else{
+            return act;
+        }
+
         switch (typeOfOperation){
 
         processBinOp(ADD);
@@ -196,29 +226,8 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
         processBinOp(MUL);
         processBinOp(DIV);
         processUnOp(SIN);
-        processUnOp(SQRT);
-
-        case TAG:{
-            processor->indOfOper += 2;
-            return CONTINUATION;
-        }
+        processUnOp(SQRT); 
         
-        case CALL:
-            stackPush(&processor->stackOfRetTags, processor->indOfOper + 2);
-            processor->indOfOper = processor->code[processor->indOfOper + 1];
-            return JUMP;
-        
-        case RET:
-            processor->indOfOper = stackPop(&processor->stackOfRetTags);
-            return JUMP;    
-        
-        case DRAW:
-            drawSquareRam(processor);
-            processor->indOfOper += 1;
-            return CONTINUATION;
-        
-        case HLT:
-            return COMPLETION;
 
         default:
             processor->indOfOper += 1;
@@ -574,18 +583,47 @@ ActionWithProcess processInOutFunc(Processor* processor, Stack_t* stack, int typ
     } 
 }
 //------------------------------------------------------------------------------------------------
-ActionWithProcess processTag(){
-
+ActionWithProcess processTag(Processor* processor, int typeOfOperation){
+    if(typeOfOperation == TAG){
+        processor->indOfOper += 2;
+        return CONTINUATION;
+    }
+    else{
+        return DEFAULT_ACT;
+    }
 }
-
-ActionWithProcess processCallAndRet(){
-
+//------------------------------------------------------------------------------------------------
+ActionWithProcess processCallAndRet(Processor* processor, int typeOfOperation){
+    if(typeOfOperation == CALL){
+        stackPush(&processor->stackOfRetTags, processor->indOfOper + 2);
+        processor->indOfOper = processor->code[processor->indOfOper + 1];
+        return JUMP;
+    }
+    else if(typeOfOperation == RET){
+        processor->indOfOper = stackPop(&processor->stackOfRetTags);
+        return JUMP;
+    }
+    else{
+        return DEFAULT_ACT;
+    }  
 }
-
-ActionWithProcess processDraw(){
-
+//------------------------------------------------------------------------------------------------
+ActionWithProcess processDraw(Processor* processor, int typeOfOperation){
+    if(typeOfOperation == DRAW){
+        drawSquareRam(processor);
+        processor->indOfOper += 1;
+        return CONTINUATION;
+    }
+    else{
+        return DEFAULT_ACT;
+    }    
 }
-
-ActionWithProcess processHtl(){
-    
+//------------------------------------------------------------------------------------------------
+ActionWithProcess processHtl(int typeofOperation){
+    if(typeofOperation == HLT){
+        return COMPLETION;
+    }
+    else{
+        return DEFAULT_ACT;
+    }
 }
