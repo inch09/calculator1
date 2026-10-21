@@ -32,4 +32,5 @@ enum TypeOfOperation{
     ERROR
 };
 
+
 #endif

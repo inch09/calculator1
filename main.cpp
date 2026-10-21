@@ -55,6 +55,10 @@ void drawSquareRam(Processor* processor);
 void deleteLastEnter(char* str);
 
 int main(){
+
+    TypeOfOperation arrOfCommands[] = {PUSH, ADD, SUB, DIV, MUL, SIN, SQRT, POPR, PSHR, 
+                                     JMP, JA, JAE, JB, JBE, JE, JNE, TAG, IN, CALL, 
+                                     RET, PSHM, POPM, DRAW, OUT, HLT, DEFAULT, ERROR};
     // Operation* operations = translate(FILE_TO_BE_TRANSLATION, FILE_WITH_TRANSLATION_RESULT);
     // assert(operations);
     // disAssembling(FILE_TO_BE_DISASSEMBLING, FILE_WITH_DISASSEMBLING_RESULT);
@@ -82,6 +86,7 @@ int main(){
         if(action == COMPLETION){
             DUMP;
             processor.indOfOper = 0;
+            processorDump(&processor, PROCESSOR_LOG_FILE);
             dumpRam(&processor);
             printf("end");
             break;
@@ -182,39 +187,31 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
         processUnOp(SQRT);
 
         case PUSH:
-            //printf("push\n");
-            //printf("ind of oper = %d\n", processor->indOfOper);
             stackPush(stack, processor->code[processor->indOfOper + 1]);
             processor->indOfOper += 2;
             return CONTINUATION;
     
         case POPR:
-            //printf("popr\n");
             processPopr(processor->code[processor->indOfOper + 1], processor, stack);
             processor->indOfOper += 2;
             return CONTINUATION;        
         
         case PSHR:
-            //printf("pshr\n");
             processPshr(processor->code[processor->indOfOper + 1], processor, stack);
             processor->indOfOper += 2;
             return CONTINUATION; 
 
         case POPM:
-            //printf("popr\n");
             processPopm(processor->code[processor->indOfOper + 1], processor, stack);
             processor->indOfOper += 2;
             return CONTINUATION;        
         
         case PSHM:
-            //printf("pshr\n");
             processPshm(processor->code[processor->indOfOper + 1], processor, stack);
             processor->indOfOper += 2;
             return CONTINUATION;     
 
-
         case TAG:{
-            //printf("tag\n");
             processor->indOfOper += 2;
             return CONTINUATION;
         }
@@ -360,6 +357,7 @@ void processPopm(int argument, Processor* processor, Stack_t* stack){
     assert(processor);
     assert(stack);
 
+    //cycle
     if(isEqual(argument, 1)){
         processor->ram[processor->registers[0]] = stackPop(stack);
     }
@@ -495,6 +493,13 @@ ActionWithProcess processJump(int typeOfOperation, Stack_t* stack, Processor* pr
     return DEFAULT_ACT;
 }
 
+#define GET_ENUM_VARIABLE(enumVar) GET_OPERATION(enumVar)
+
+#define GET_OPERATION(operation)    \
+    case operation:                 \
+        strOperation = #operation;  \
+        break;
+
 void processorDump(Processor* processor, const char* processorLogFile){
     assert(processor);
     FILE* prLogFile = fopen(processorLogFile, "w");
@@ -502,14 +507,27 @@ void processorDump(Processor* processor, const char* processorLogFile){
 
     fprintf(prLogFile, "                  IT IS INFORMATION ABOUT YOUR PROCESSOR\n");
     for(size_t i = 0; i < processor->countOfCommands; i++){
-        fprintf(prLogFile, "%2d ", processor->code[i]);
+        fprintf(prLogFile, "%d ", processor->code[i]);
     }
 
     fprintf(prLogFile, "\n");
     for(size_t i = 0; i < processor->indOfOper; i++){
         fprintf(prLogFile, "   ");
     }
-    fprintf(prLogFile, "^");
+    fprintf(prLogFile, "^\n\n");
+
+    fprintf(prLogFile, "\n");
+    for(size_t i = 0; i < processor->indOfOper; i++){
+        fprintf(prLogFile, "   ");
+    }
+
+    const char* strOperation = "";
+    fprintf(prLogFile, "^\n\n");
+
+
+    
+    fprintf(prLogFile, "-------------------------------------------------------------------------------\n");
+    fprintf(prLogFile, "                  Registers of processor\n");
 
     fprintf(prLogFile, "\n\n---------------------------------------------------------------------------------------------------------------------------------------------------------------------\n\n");
     fprintf(prLogFile, "Current processor instruction: ");
@@ -517,6 +535,8 @@ void processorDump(Processor* processor, const char* processorLogFile){
 
 }
 
+#undef GET_OPERATION
+#undef GET_ENUM_VARIABLE
 
 void dumpRam(Processor* processor){
     assert(processor);
@@ -542,6 +562,7 @@ void drawSquareRam(Processor* processor){
         printf("\n");
     }
 }
+
 
 // void drawCircle(Processor* processor){
 //     assert(processor);

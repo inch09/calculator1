@@ -464,7 +464,7 @@ bool strIsWithoutOperations(const char* str){
     }
     return without;
 }
-
+//---------------------------------------------------------------------------
 int getIndOfTagByName(Tag* arrOfTags, const char* nameTag){
     assert(arrOfTags);
     assert(nameTag);
