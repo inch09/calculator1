@@ -163,63 +163,31 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
 
         ActionWithProcess act = DEFAULT_ACT;
         act = processJump(typeOfOperation, stack, processor);
-        if(act == DEFAULT_ACT){
-        }
-        else{
-            return act;
-        }
+        if(act != DEFAULT_ACT) return act;
 
         act = processPoprsAndPushes(processor, stack, typeOfOperation);
-        if(act == DEFAULT_ACT){
-        }
-        else{
-            return act;
-        }
+        if(act != DEFAULT_ACT) return act;
 
         act = processInOutFunc(processor, stack, typeOfOperation);
-        if(act == DEFAULT_ACT){
-        }
-        else{
-            return act;
-        }
+        if(act != DEFAULT_ACT) return act;
 
         act = processTag(processor, typeOfOperation);
-        if(act == DEFAULT_ACT){
-        }
-        else{
-            return act;
-        }
+        if(act != DEFAULT_ACT) return act;
 
         act = processCallAndRet(processor, typeOfOperation);
-        if(act == DEFAULT_ACT){
-        }
-        else{
-            return act;
-        }
+        if(act != DEFAULT_ACT) return act;
+
         act = processDraw(processor, typeOfOperation);
-        if(act == DEFAULT_ACT){
-        }
-        else{
-            return act;
-        }
+        if(act != DEFAULT_ACT) return act;
+
         act = processHlt(typeOfOperation);
-        if(act == DEFAULT_ACT){
-        }
-        else{
-            return act;
-        }
+        if(act != DEFAULT_ACT) return act;
+
         act = processBinOp(processor, stack, typeOfOperation);
-        if(act == DEFAULT_ACT){
-        }
-        else{
-            return act;
-        }
+        if(act != DEFAULT_ACT) return act;
+
         act = processUnOp(processor, stack, typeOfOperation);
-        if(act == DEFAULT_ACT){
-        }
-        else{
-            return act;
-        }
+        if(act != DEFAULT_ACT) return act;
         
     return COMPLETION;
 }
