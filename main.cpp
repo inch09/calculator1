@@ -219,7 +219,7 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
         
         case HLT:
             return COMPLETION;
-            
+
         default:
             processor->indOfOper += 1;
             return CONTINUATION;     
@@ -574,10 +574,18 @@ ActionWithProcess processInOutFunc(Processor* processor, Stack_t* stack, int typ
     } 
 }
 //------------------------------------------------------------------------------------------------
+ActionWithProcess processTag(){
 
-// void drawCircle(Processor* processor){
-//     assert(processor);
+}
 
+ActionWithProcess processCallAndRet(){
 
+}
 
-// }
+ActionWithProcess processDraw(){
+
+}
+
+ActionWithProcess processHtl(){
+    
+}
