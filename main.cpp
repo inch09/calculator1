@@ -12,7 +12,7 @@
 
 #define FILE_WITH_CODE "code.txt"
 #define PROCESSOR_LOG_FILE "processor.log"
-
+//----------------------------------------------------------------------------------
 enum ActionWithProcess{
     DEFAULT_ACT,
     CONTINUATION,
@@ -30,6 +30,7 @@ struct Processor{
 };
 
 #define DUMP stackDump(LOG_FILE, &stack);
+//----------------------------------------------------------------------------------
 
 void processorInit(Processor* processor);
 int fillCodeArr(Processor* processor, const char* fileWithCode);
@@ -41,27 +42,23 @@ void binaryOperation(Stack_t* stk, TypeOfOperation operation);
 void unaryOperation(Stack_t* stack, TypeOfOperation operation);
 ActionWithProcess processOperation(Processor* processor, Stack_t* stack);
 
-
+ActionWithProcess processInOutFunc(Processor* processor, Stack_t* stack, int typeOfOperation);
 ActionWithProcess processJump(int typeOfOperation, Stack_t* stack, Processor* processor);
+ActionWithProcess processPoprsAndPushes(Processor* processor, Stack_t* stack, int typeOfOperation);
 void processPshr(int argument, Processor* processor, Stack_t* stack);
 void processPopr(int argument, Processor* processor, Stack_t* stack);
 void processPshm(int argument, Processor* processor, Stack_t* stack);
 void processPopm(int argument, Processor* processor, Stack_t* stack);
 
 void drawSquareRam(Processor* processor);
-
-
-
 void deleteLastEnter(char* str);
+//----------------------------------------------------------------------------------
 
 int main(){
 
     TypeOfOperation arrOfCommands[] = {PUSH, ADD, SUB, DIV, MUL, SIN, SQRT, POPR, PSHR, 
-                                     JMP, JA, JAE, JB, JBE, JE, JNE, TAG, IN, CALL, 
-                                     RET, PSHM, POPM, DRAW, OUT, HLT, DEFAULT, ERROR};
-    // Operation* operations = translate(FILE_TO_BE_TRANSLATION, FILE_WITH_TRANSLATION_RESULT);
-    // assert(operations);
-    // disAssembling(FILE_TO_BE_DISASSEMBLING, FILE_WITH_DISASSEMBLING_RESULT);
+                                       JMP, JA, JAE, JB, JBE, JE, JNE, TAG, IN, CALL, 
+                                       RET, PSHM, POPM, DRAW, OUT, HLT, DEFAULT, ERROR};
 
     Processor processor = {};
     processorInit(&processor);
@@ -73,10 +70,6 @@ int main(){
 
     FILE* filePtr = fopen(FILE_WITH_CODE , "r");
     assert(filePtr);
-
-    // for(int i = 0; i < processor.countOfCommands; i++){
-    //     printf("%d ", processor.code[i]);
-    // }
 
     while(true){
         //processorDump(&processor, PROCESSOR_LOG_FILE);
@@ -100,7 +93,7 @@ int main(){
     
     return 0;
 }
-
+//----------------------------------------------------------------------------------
 void binaryOperation(Stack_t* stk, TypeOfOperation operation){
     assert(stk);
 
@@ -127,9 +120,12 @@ void binaryOperation(Stack_t* stk, TypeOfOperation operation){
 
     case DEFAULT:
         return;
+
+    default:
+        return;    
     }
 }
-
+//----------------------------------------------------------------------------------
 void unaryOperation(Stack_t* stack, TypeOfOperation operation){
     assert(stack);
 
@@ -143,10 +139,13 @@ void unaryOperation(Stack_t* stack, TypeOfOperation operation){
     case SQRT:
         stackPush(stack, sqrt(a));
         return;
+    
+    default:
+        return;    
     }
-
+    
 }
-
+//----------------------------------------------------------------------------------
 #define processBinOp(typeOfOp)\
     case typeOfOp:\
         binaryOperation(stack, typeOfOp);\
@@ -167,9 +166,23 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
 
 
     int typeOfOperation = processor->code[processor->indOfOper];
-    Stack_elem_t elem = 0;
 
-        ActionWithProcess act = processJump(typeOfOperation, stack, processor);
+        ActionWithProcess act = DEFAULT_ACT;
+        act = processJump(typeOfOperation, stack, processor);
+        if(act == DEFAULT_ACT){
+        }
+        else{
+            return act;
+        }
+
+        act = processPoprsAndPushes(processor, stack, typeOfOperation);
+        if(act == DEFAULT_ACT){
+        }
+        else{
+            return act;
+        }
+
+        act = processInOutFunc(processor, stack, typeOfOperation);
         if(act == DEFAULT_ACT){
         }
         else{
@@ -182,53 +195,13 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
         processBinOp(SUB);
         processBinOp(MUL);
         processBinOp(DIV);
-
         processUnOp(SIN);
         processUnOp(SQRT);
-
-        case PUSH:
-            stackPush(stack, processor->code[processor->indOfOper + 1]);
-            processor->indOfOper += 2;
-            return CONTINUATION;
-    
-        case POPR:
-            processPopr(processor->code[processor->indOfOper + 1], processor, stack);
-            processor->indOfOper += 2;
-            return CONTINUATION;        
-        
-        case PSHR:
-            processPshr(processor->code[processor->indOfOper + 1], processor, stack);
-            processor->indOfOper += 2;
-            return CONTINUATION; 
-
-        case POPM:
-            processPopm(processor->code[processor->indOfOper + 1], processor, stack);
-            processor->indOfOper += 2;
-            return CONTINUATION;        
-        
-        case PSHM:
-            processPshm(processor->code[processor->indOfOper + 1], processor, stack);
-            processor->indOfOper += 2;
-            return CONTINUATION;     
 
         case TAG:{
             processor->indOfOper += 2;
             return CONTINUATION;
         }
-
-        case IN:{
-            int argument = 0;
-            int c = scanf("%d", &argument);
-            if(c == 1){
-                stackPush(stack, argument);
-                processor->indOfOper += 1;
-                return CONTINUATION;
-            }
-            else{
-                printf("error enter\n");
-                return COMPLETION;
-            }
-        }    
         
         case CALL:
             stackPush(&processor->stackOfRetTags, processor->indOfOper + 2);
@@ -238,15 +211,6 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
         case RET:
             processor->indOfOper = stackPop(&processor->stackOfRetTags);
             return JUMP;    
-    
-        case OUT:
-            //printf("out\n");
-            elem = stackPop(stack);
-            printf(SPECIFIER, elem);
-            printf("\n");
-            stackPush(stack, elem);
-            processor->indOfOper += 1;
-            return CONTINUATION;
         
         case DRAW:
             drawSquareRam(processor);
@@ -255,6 +219,7 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
         
         case HLT:
             return COMPLETION;
+            
         default:
             processor->indOfOper += 1;
             return CONTINUATION;     
@@ -264,7 +229,7 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
 
 #undef processBinOp
 #undef processUnOp
-
+//----------------------------------------------------------------------------------
 void processorInit(Processor* processor){
     assert(processor);
 
@@ -286,7 +251,7 @@ void processorInit(Processor* processor){
     stackInit(&processor->stackOfRetTags, 10);
     
 }
-
+//----------------------------------------------------------------------------------
 void processPshr(int argument, Processor* processor, Stack_t* stack){
     assert(processor);
     assert(stack);
@@ -307,7 +272,7 @@ void processPshr(int argument, Processor* processor, Stack_t* stack){
         stackPush(stack, processor->registers[3]);
     }
 }
-
+//----------------------------------------------------------------------------------
 void processPopr(int argument, Processor* processor, Stack_t* stack){
 
     assert(processor);
@@ -329,8 +294,7 @@ void processPopr(int argument, Processor* processor, Stack_t* stack){
         processor->registers[3] = stackPop(stack);
     }
 }
-
-
+//----------------------------------------------------------------------------------
 void processPshm(int argument, Processor* processor, Stack_t* stack){
     assert(processor);
     assert(stack);
@@ -351,7 +315,7 @@ void processPshm(int argument, Processor* processor, Stack_t* stack){
         stackPush(stack, processor->ram[processor->registers[3]]);
     }
 }
-
+//----------------------------------------------------------------------------------
 void processPopm(int argument, Processor* processor, Stack_t* stack){
 
     assert(processor);
@@ -374,8 +338,7 @@ void processPopm(int argument, Processor* processor, Stack_t* stack){
         processor->ram[processor->registers[3]] = stackPop(stack);
     }
 }
-
-
+//----------------------------------------------------------------------------------
 int fillCodeArr(Processor* processor, const char* fileWithCode){
     assert(processor);
 
@@ -424,7 +387,7 @@ void deleteLastEnter(char* str){
         str[strlen(str)- 1] = '\0';
     }
 }
-
+//----------------------------------------------------------------------------------
 ActionWithProcess processJump(int typeOfOperation, Stack_t* stack, Processor* processor){
 
     assert(stack);
@@ -492,7 +455,7 @@ ActionWithProcess processJump(int typeOfOperation, Stack_t* stack, Processor* pr
     }
     return DEFAULT_ACT;
 }
-
+//----------------------------------------------------------------------------------
 #define GET_ENUM_VARIABLE(enumVar) GET_OPERATION(enumVar)
 
 #define GET_OPERATION(operation)    \
@@ -537,7 +500,7 @@ void processorDump(Processor* processor, const char* processorLogFile){
 
 #undef GET_OPERATION
 #undef GET_ENUM_VARIABLE
-
+//----------------------------------------------------------------------------------
 void dumpRam(Processor* processor){
     assert(processor);
 
@@ -545,8 +508,7 @@ void dumpRam(Processor* processor){
         printf("%d ", processor->ram[i]);
     }
 }
-
-
+//----------------------------------------------------------------------------------
 void drawSquareRam(Processor* processor){
     assert(processor);
 
@@ -562,7 +524,56 @@ void drawSquareRam(Processor* processor){
         printf("\n");
     }
 }
+//----------------------------------------------------------------------------------
+ActionWithProcess processPoprsAndPushes(Processor* processor, Stack_t* stack, int typeOfOperation){
+    assert(processor);
+    assert(stack);
 
+    switch(typeOfOperation){
+        case PUSH: stackPush(stack, processor->code[processor->indOfOper + 1]);
+            break;
+        case POPR: processPopr(processor->code[processor->indOfOper + 1], processor, stack);
+            break;
+        case PSHR: processPshr(processor->code[processor->indOfOper + 1], processor, stack);
+            break;
+        case POPM: processPopm(processor->code[processor->indOfOper + 1], processor, stack);
+            break;
+        case PSHM: processPshm(processor->code[processor->indOfOper + 1], processor, stack);
+            break;
+        default: return DEFAULT_ACT;
+    }
+
+    processor->indOfOper += 2;
+    return CONTINUATION;
+}
+//-----------------------------------------------------------------------------------------
+ActionWithProcess processInOutFunc(Processor* processor, Stack_t* stack, int typeOfOperation){
+    if(typeOfOperation == IN){
+        int argument = 0;
+        int isOkArgument = scanf("%d", &argument);
+        if(isOkArgument == 1){
+            stackPush(stack, argument);
+            processor->indOfOper += 1;
+            return CONTINUATION;
+        }
+        else{
+            printf("error enter\n");
+            return COMPLETION;
+        }
+    }
+    else if(typeOfOperation == OUT){
+        Stack_elem_t elem = stackPop(stack);
+        printf(SPECIFIER, elem);
+        printf("\n");
+        stackPush(stack, elem);
+        processor->indOfOper += 1;
+        return CONTINUATION;
+    }   
+    else{
+        return DEFAULT_ACT;
+    } 
+}
+//------------------------------------------------------------------------------------------------
 
 // void drawCircle(Processor* processor){
 //     assert(processor);
