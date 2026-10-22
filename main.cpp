@@ -38,6 +38,9 @@ int fillCodeArr(Processor* processor, const char* fileWithCode);
 void processorDump(Processor* processor, const char* processorLogFile);
 bool isCommandHaveArgument(int typeOfOperation, TypeOfOperation* oper);
 void getStringEnum(TypeOfOperation* typeOfOperation, const char** strOp);
+void printValuesOfRegisters(Processor* processor, FILE* prLogFile);
+void printRam(Processor* processor, FILE* prLogFile);
+void printCode(Processor* processor, FILE* prLogFile);
 
 void dumpRam(Processor* processor);
 
@@ -572,9 +575,6 @@ ActionWithProcess processUnOp(Processor* processor, Stack_t* stack, int typeOfOp
     }
 }
 //------------------------------------------------------------------------------------------------
-#define GET_ENUM_VARIABLE(enumVar) GET_OPERATION(enumVar)
-#define GET_OPERATION(enumVar) strOperation = #enumVar
-
 void processorDump(Processor* processor, const char* processorLogFile){
     assert(processor);
     assert(processorLogFile);
@@ -582,15 +582,51 @@ void processorDump(Processor* processor, const char* processorLogFile){
     FILE* prLogFile = fopen(processorLogFile, "w");
     assert(prLogFile);
 
+    printCode(processor, prLogFile);
+    printValuesOfRegisters(processor, prLogFile);
+    printRam(processor, prLogFile);
+
+    fclose(prLogFile);
+}
+//--------------------------------------------------------------------------------------------------------------
+void printValuesOfRegisters(Processor* processor, FILE* prLogFile){
+    assert(processor);
+    assert(prLogFile);
+
+    fprintf(prLogFile, "------------------------------------------------------------------------------------------------------------------------------\n");
+    fprintf(prLogFile, "                  Registers of processor\n");
+    fprintf(prLogFile, "AX = %d\n", processor->registers[0]);
+    fprintf(prLogFile, "BX = %d\n", processor->registers[1]);
+    fprintf(prLogFile, "CX = %d\n", processor->registers[2]);
+    fprintf(prLogFile, "DX = %d\n", processor->registers[3]);
+}
+//-----------------------------------------------------------------------------------------------
+void printRam(Processor* processor, FILE* prLogFile){
+    assert(processor);
+    assert(prLogFile);
+
+    fprintf(prLogFile, "----------------------------------------------------------------------------------------------------------------\n");
+    fprintf(prLogFile, "                  Information about RAM\n");
+    size_t string = 0;
+    for(size_t i = 0; i < SIZE_OF_RAM; i++){
+        string++;
+        fprintf(prLogFile, "%4d.[%d] ", (int) i, processor->ram[i]);
+        if(string >= SIZE_OF_RAM / 10){
+            fprintf(prLogFile, "\n");
+            string = 0;
+        }
+        else{
+            string++;
+        }
+    }
+}
+//-----------------------------------------------------------------------------------------------
+void printCode(Processor* processor, FILE* prLogFile){
+    assert(processor);
+    assert(prLogFile);
+        
     size_t numOfCommand = 1;
     TypeOfOperation oper = DEFAULT;
-
-    TypeOfOperation arrOfCommandsWithoutArg[] = {ADD, SUB, DIV, MUL, SIN, SQRT, 
-                                                 IN, RET, DRAW, OUT, HLT, DEFAULT, ERROR};
-
-    TypeOfOperation arrOfCommandsWithArg[] = {PUSH, POPR, PSHR, 
-                                              JMP, JA, JAE, JB, JBE, JE, JNE, TAG, CALL, 
-                                              PSHM, POPM};
 
     fprintf(prLogFile, "                  IT IS INFORMATION ABOUT YOUR PROCESSOR\n");
     for(size_t i = 0; i < processor->countOfCommands; i++){
@@ -621,39 +657,8 @@ void processorDump(Processor* processor, const char* processorLogFile){
         i += increase;
     }
 
-    fprintf(prLogFile, "------------------------------------------------------------------------------------------------------------------------------\n");
-    fprintf(prLogFile, "                  Registers of processor\n");
-    fprintf(prLogFile, "AX = %d\n", processor->registers[0]);
-    fprintf(prLogFile, "BX = %d\n", processor->registers[1]);
-    fprintf(prLogFile, "CX = %d\n", processor->registers[2]);
-    fprintf(prLogFile, "DX = %d\n", processor->registers[3]);
-    fprintf(prLogFile, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------\n\n");
-
-
-
-    fprintf(prLogFile, "----------------------------------------------------------------------------------------------------------------\n");
-    fprintf(prLogFile, "                  Information about RAM\n");
-    size_t string = 0;
-    for(size_t i = 0; i < SIZE_OF_RAM; i++){
-        string++;
-        fprintf(prLogFile, "%4d.[%d] ", (int) i, processor->ram[i]);
-        if(string >= SIZE_OF_RAM / 10){
-            fprintf(prLogFile, "\n");
-            string = 0;
-        }
-        else{
-            string++;
-        }
-    }
-
-    
-    fclose(prLogFile);
-
 }
-
-#undef GET_OPERATION
-#undef GET_ENUM_VARIABLE
-//--------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------
 bool isCommandHaveArgument(int typeOfOperation, TypeOfOperation* oper){
     assert(oper);
 
@@ -722,3 +727,5 @@ void getStringEnum(TypeOfOperation* typeOfOperation, const char** strOp){
                 break;
         }
 }
+
+#undef GET_OPERATION
