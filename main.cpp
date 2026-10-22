@@ -34,7 +34,11 @@ struct Processor{
 
 void processorInit(Processor* processor);
 int fillCodeArr(Processor* processor, const char* fileWithCode);
+
 void processorDump(Processor* processor, const char* processorLogFile);
+bool isCommandHaveArgument(int typeOfOperation, TypeOfOperation* oper);
+void getStringEnum(TypeOfOperation* typeOfOperation, const char** strOp);
+
 void dumpRam(Processor* processor);
 
 
@@ -78,9 +82,9 @@ int main(){
     assert(filePtr);
 
     while(true){
-        //processorDump(&processor, PROCESSOR_LOG_FILE);
+        processorDump(&processor, PROCESSOR_LOG_FILE);
         //stackDump("stack.log", &stack);
-        //getchar();
+        getchar();
         ActionWithProcess action = processOperation(&processor, &stack);
         if(action == COMPLETION){
             DUMP;
@@ -319,8 +323,6 @@ int fillCodeArr(Processor* processor, const char* fileWithCode){
 
     int count = sscanf(strCommand, "%d %d", &command, &argument);
 
-    //sdelat rashirenie massiva v sluchae chego
-
     if(count == 1){
         processor->code[processor->indOfOper++] = command;
         //printf("command = %d, 1\n", command);
@@ -418,51 +420,6 @@ ActionWithProcess processJump(int typeOfOperation, Stack_t* stack, Processor* pr
     }
     return DEFAULT_ACT;
 }
-//----------------------------------------------------------------------------------
-#define GET_ENUM_VARIABLE(enumVar) GET_OPERATION(enumVar)
-
-#define GET_OPERATION(operation)    \
-    case operation:                 \
-        strOperation = #operation;  \
-        break;
-
-void processorDump(Processor* processor, const char* processorLogFile){
-    assert(processor);
-    FILE* prLogFile = fopen(processorLogFile, "w");
-    assert(prLogFile);
-
-    fprintf(prLogFile, "                  IT IS INFORMATION ABOUT YOUR PROCESSOR\n");
-    for(size_t i = 0; i < processor->countOfCommands; i++){
-        fprintf(prLogFile, "%d ", processor->code[i]);
-    }
-
-    fprintf(prLogFile, "\n");
-    for(size_t i = 0; i < processor->indOfOper; i++){
-        fprintf(prLogFile, "   ");
-    }
-    fprintf(prLogFile, "^\n\n");
-
-    fprintf(prLogFile, "\n");
-    for(size_t i = 0; i < processor->indOfOper; i++){
-        fprintf(prLogFile, "   ");
-    }
-
-    const char* strOperation = "";
-    fprintf(prLogFile, "^\n\n");
-
-
-    
-    fprintf(prLogFile, "-------------------------------------------------------------------------------\n");
-    fprintf(prLogFile, "                  Registers of processor\n");
-
-    fprintf(prLogFile, "\n\n---------------------------------------------------------------------------------------------------------------------------------------------------------------------\n\n");
-    fprintf(prLogFile, "Current processor instruction: ");
-    fclose(prLogFile);
-
-}
-
-#undef GET_OPERATION
-#undef GET_ENUM_VARIABLE
 //----------------------------------------------------------------------------------
 void dumpRam(Processor* processor){
     assert(processor);
@@ -613,4 +570,139 @@ ActionWithProcess processUnOp(Processor* processor, Stack_t* stack, int typeOfOp
     else{
         return DEFAULT_ACT;
     }
+}
+//------------------------------------------------------------------------------------------------
+#define GET_ENUM_VARIABLE(enumVar) GET_OPERATION(enumVar)
+#define GET_OPERATION(enumVar) strOperation = #enumVar
+
+void processorDump(Processor* processor, const char* processorLogFile){
+    assert(processor);
+    assert(processorLogFile);
+
+    FILE* prLogFile = fopen(processorLogFile, "w");
+    assert(prLogFile);
+
+    size_t numOfCommand = 1;
+    TypeOfOperation oper = DEFAULT;
+
+    TypeOfOperation arrOfCommandsWithoutArg[] = {ADD, SUB, DIV, MUL, SIN, SQRT, 
+                                                 IN, RET, DRAW, OUT, HLT, DEFAULT, ERROR};
+
+    TypeOfOperation arrOfCommandsWithArg[] = {PUSH, POPR, PSHR, 
+                                              JMP, JA, JAE, JB, JBE, JE, JNE, TAG, CALL, 
+                                              PSHM, POPM};
+
+    fprintf(prLogFile, "                  IT IS INFORMATION ABOUT YOUR PROCESSOR\n");
+    for(size_t i = 0; i < processor->countOfCommands; i++){
+        int increase = 0;
+        const char* strOperation = "";
+        fprintf(prLogFile, "%d. ", numOfCommand);
+        if(isCommandHaveArgument(processor->code[i], &oper)){
+            fprintf(prLogFile, "%d ", processor->code[i]);
+            fprintf(prLogFile, "%d", processor->code[i + 1]);
+            increase = 1;
+        }
+        else{
+            fprintf(prLogFile, "%d", processor->code[i]);
+        }
+
+        getStringEnum(&oper, &strOperation);
+
+        if(i == processor->indOfOper){
+            fprintf(prLogFile, "  <----- ");
+            fprintf(prLogFile, "%s", strOperation);
+            if(isCommandHaveArgument(processor->code[i], &oper)){
+                fprintf(prLogFile, " %d", processor->code[i + 1]);
+            }
+        }
+        
+        fprintf(prLogFile, "\n");
+        numOfCommand++;
+        i += increase;
+    }
+
+    // for()
+
+    fprintf(prLogFile, "-------------------------------------------------------------------------------\n");
+    fprintf(prLogFile, "                  Registers of processor\n");
+    fprintf(prLogFile, "AX = %d\n", processor->registers[0]);
+    fprintf(prLogFile, "BX = %d\n", processor->registers[1]);
+    fprintf(prLogFile, "CX = %d\n", processor->registers[2]);
+    fprintf(prLogFile, "DX = %d\n", processor->registers[3]);
+    fprintf(prLogFile, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------\n\n");
+    
+    fclose(prLogFile);
+
+}
+
+#undef GET_OPERATION
+#undef GET_ENUM_VARIABLE
+//--------------------------------------------------------------------------------------------------------------
+bool isCommandHaveArgument(int typeOfOperation, TypeOfOperation* oper){
+    assert(oper);
+
+    TypeOfOperation arrOfCommandsWithoutArg[] = {ADD, SUB, DIV, MUL, SIN, SQRT, 
+                                                 IN, RET, DRAW, OUT, HLT, DEFAULT, ERROR}; 
+    TypeOfOperation arrOfCommandsWithArg[] = {PUSH, POPR, PSHR, JMP, JA, JAE, JB,
+                                              JBE, JE, JNE, TAG, CALL, PSHM, POPM};                                         
+
+    size_t sizeOfArrOfComWithoutArg  = sizeof(arrOfCommandsWithoutArg) / sizeof(arrOfCommandsWithoutArg[0]);
+    size_t sizeOfArrOfComWithArg  =    sizeof(arrOfCommandsWithArg) / sizeof(arrOfCommandsWithArg[0]);
+
+    for(size_t i = 0; i < sizeOfArrOfComWithoutArg; i++){
+        if(typeOfOperation == arrOfCommandsWithoutArg[i]){
+            *oper = arrOfCommandsWithoutArg[i];
+            return false;
+        }
+    }
+
+    for(size_t i = 0; i < sizeOfArrOfComWithArg; i++){
+        if(typeOfOperation == arrOfCommandsWithArg[i]){
+            *oper = arrOfCommandsWithArg[i];
+            return true;
+        }
+    }
+
+    return false;    
+}
+//---------------------------------------------------------------------------------------------------------
+#define GET_OPERATION(operation)    \
+    case operation:                 \
+        *strOp = #operation;  \
+        break;
+
+void getStringEnum(TypeOfOperation* typeOfOperation, const char** strOp){
+    assert(typeOfOperation);
+    assert(strOp);
+    assert(*strOp);
+
+     switch(*typeOfOperation){        
+            GET_OPERATION(PUSH);
+            GET_OPERATION(ADD);
+            GET_OPERATION(SUB);
+            GET_OPERATION(DIV);
+            GET_OPERATION(MUL);
+            GET_OPERATION(SIN);
+            GET_OPERATION(SQRT);
+            GET_OPERATION(POPR);
+            GET_OPERATION(PSHR);
+            GET_OPERATION(JMP);
+            GET_OPERATION(JA);
+            GET_OPERATION(JAE);
+            GET_OPERATION(JB);
+            GET_OPERATION(JBE);
+            GET_OPERATION(JE);
+            GET_OPERATION(JNE);
+            GET_OPERATION(TAG);
+            GET_OPERATION(IN);
+            GET_OPERATION(CALL);
+            GET_OPERATION(DRAW);
+            GET_OPERATION(RET);
+            GET_OPERATION(OUT);
+            GET_OPERATION(HLT);
+            GET_OPERATION(DEFAULT);
+            GET_OPERATION(ERROR);
+            default:
+                break;
+        }
 }
