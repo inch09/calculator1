@@ -82,9 +82,9 @@ int main(){
     assert(filePtr);
 
     while(true){
-        processorDump(&processor, PROCESSOR_LOG_FILE);
+        //processorDump(&processor, PROCESSOR_LOG_FILE);
         //stackDump("stack.log", &stack);
-        getchar();
+        //getchar();
         ActionWithProcess action = processOperation(&processor, &stack);
         if(action == COMPLETION){
             DUMP;
@@ -621,15 +621,31 @@ void processorDump(Processor* processor, const char* processorLogFile){
         i += increase;
     }
 
-    // for()
-
-    fprintf(prLogFile, "-------------------------------------------------------------------------------\n");
+    fprintf(prLogFile, "------------------------------------------------------------------------------------------------------------------------------\n");
     fprintf(prLogFile, "                  Registers of processor\n");
     fprintf(prLogFile, "AX = %d\n", processor->registers[0]);
     fprintf(prLogFile, "BX = %d\n", processor->registers[1]);
     fprintf(prLogFile, "CX = %d\n", processor->registers[2]);
     fprintf(prLogFile, "DX = %d\n", processor->registers[3]);
     fprintf(prLogFile, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------\n\n");
+
+
+
+    fprintf(prLogFile, "----------------------------------------------------------------------------------------------------------------\n");
+    fprintf(prLogFile, "                  Information about RAM\n");
+    size_t string = 0;
+    for(size_t i = 0; i < SIZE_OF_RAM; i++){
+        string++;
+        fprintf(prLogFile, "%4d.[%d] ", (int) i, processor->ram[i]);
+        if(string >= SIZE_OF_RAM / 10){
+            fprintf(prLogFile, "\n");
+            string = 0;
+        }
+        else{
+            string++;
+        }
+    }
+
     
     fclose(prLogFile);
 
