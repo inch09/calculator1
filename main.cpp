@@ -78,9 +78,9 @@ int main(){
     assert(filePtr);
 
     while(true){
-        processorDump(&processor, PROCESSOR_LOG_FILE);
+        //processorDump(&processor, PROCESSOR_LOG_FILE);
         //stackDump("stack.log", &stack);
-        getchar();
+        //getchar();
         ActionWithProcess action = processOperation(&processor, &stack);
         if(action == COMPLETION){
             DUMP;
