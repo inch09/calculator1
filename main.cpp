@@ -6,10 +6,9 @@
 #include <string.h>
 #include "operations.h"
 #include "stack.h"
-
+//----------------------------------------------------------------------------------
 #define MAX_LENGTH_OF_ARR_CODE 500
 #define SIZE_OF_RAM 41*41
-
 #define FILE_WITH_CODE "code.txt"
 #define PROCESSOR_LOG_FILE "processor.log"
 //----------------------------------------------------------------------------------
@@ -19,7 +18,7 @@ enum ActionWithProcess{
     COMPLETION,
     JUMP
 };
-
+//----------------------------------------------------------------------------------
 struct Processor{
     int registers[4];
     int* code;
@@ -31,24 +30,22 @@ struct Processor{
 
 #define DUMP stackDump(LOG_FILE, &stack);
 //----------------------------------------------------------------------------------
-
 void processorInit(Processor* processor);
 int fillCodeArr(Processor* processor, const char* fileWithCode);
-
+void processorDestroy(Processor* processor);
+//----------------------------------------------------------------------------------
 void processorDump(Processor* processor, const char* processorLogFile);
 bool isCommandHaveArgument(int typeOfOperation, TypeOfOperation* oper);
 void getStringEnum(TypeOfOperation* typeOfOperation, const char** strOp);
 void printValuesOfRegisters(Processor* processor, FILE* prLogFile);
 void printRam(Processor* processor, FILE* prLogFile);
 void printCode(Processor* processor, FILE* prLogFile);
-
 void dumpRam(Processor* processor);
-
-
+//----------------------------------------------------------------------------------
 void binaryOperation(Stack_t* stack, int operation);
 void unaryOperation (Stack_t* stack, int operation);
+//----------------------------------------------------------------------------------
 ActionWithProcess processOperation(Processor* processor, Stack_t* stack);
-
 ActionWithProcess processUnOp(Processor* processor, Stack_t* stack, int typeOfOperation);
 ActionWithProcess processBinOp(Processor* processor, Stack_t* stack, int typeOfOperation);
 ActionWithProcess processHlt(int typeofOperation);
@@ -58,25 +55,21 @@ ActionWithProcess processTag(Processor* processor, int typeOfOperation);
 ActionWithProcess processInOutFunc(Processor* processor, Stack_t* stack, int typeOfOperation);
 ActionWithProcess processJump(int typeOfOperation, Stack_t* stack, Processor* processor);
 ActionWithProcess processPoprsAndPushes(Processor* processor, Stack_t* stack, int typeOfOperation);
+//----------------------------------------------------------------------------------
 void processPshr(int argument, Processor* processor, Stack_t* stack);
 void processPopr(int argument, Processor* processor, Stack_t* stack);
 void processPshm(int argument, Processor* processor, Stack_t* stack);
 void processPopm(int argument, Processor* processor, Stack_t* stack);
-
+//----------------------------------------------------------------------------------
 void drawSquareRam(Processor* processor);
 void deleteLastEnter(char* str);
 //----------------------------------------------------------------------------------
 
 int main(){
-
-    TypeOfOperation arrOfCommands[] = {PUSH, ADD, SUB, DIV, MUL, SIN, SQRT, POPR, PSHR, 
-                                       JMP, JA, JAE, JB, JBE, JE, JNE, TAG, IN, CALL, 
-                                       RET, PSHM, POPM, DRAW, OUT, HLT, DEFAULT, ERROR};
-
+    
     Processor processor = {};
     processorInit(&processor);
     fillCodeArr(&processor, FILE_WITH_CODE);
-    printf("count com = %d\n", processor.countOfCommands);
 
     Stack_t stack = {};
     stackInit(&stack, 10);
@@ -85,23 +78,23 @@ int main(){
     assert(filePtr);
 
     while(true){
-        //processorDump(&processor, PROCESSOR_LOG_FILE);
+        processorDump(&processor, PROCESSOR_LOG_FILE);
         //stackDump("stack.log", &stack);
-        //getchar();
+        getchar();
         ActionWithProcess action = processOperation(&processor, &stack);
         if(action == COMPLETION){
             DUMP;
             processor.indOfOper = 0;
             processorDump(&processor, PROCESSOR_LOG_FILE);
-            dumpRam(&processor);
+            //dumpRam(&processor);
             printf("end");
             break;
         }
         
     }
-    
-    free(processor.code);//napisat destroy
-    free(processor.ram);
+
+    processorDestroy(&processor);
+    stackDestroy(&stack);
     fclose(filePtr);
     
     return 0;
@@ -221,6 +214,16 @@ void processorInit(Processor* processor){
     stackInit(&processor->stackOfRetTags, 10);
     
 }
+//--------------------------------------------------------------------------------------------------
+void processorDestroy(Processor* processor){
+    assert(processor);
+
+    free(processor->code);
+    free(processor->ram);
+    stackDestroy(&processor->stackOfRetTags);
+    
+    processor = NULL;
+}
 //----------------------------------------------------------------------------------
 void processPshr(int argument, Processor* processor, Stack_t* stack){
     assert(processor);
@@ -291,7 +294,6 @@ void processPopm(int argument, Processor* processor, Stack_t* stack){
     assert(processor);
     assert(stack);
 
-    //cycle
     if(isEqual(argument, 1)){
         processor->ram[processor->registers[0]] = stackPop(stack);
     }
@@ -664,8 +666,9 @@ bool isCommandHaveArgument(int typeOfOperation, TypeOfOperation* oper){
 
     TypeOfOperation arrOfCommandsWithoutArg[] = {ADD, SUB, DIV, MUL, SIN, SQRT, 
                                                  IN, RET, DRAW, OUT, HLT, DEFAULT, ERROR}; 
-    TypeOfOperation arrOfCommandsWithArg[] = {PUSH, POPR, PSHR, JMP, JA, JAE, JB,
-                                              JBE, JE, JNE, TAG, CALL, PSHM, POPM};                                         
+    
+    TypeOfOperation arrOfCommandsWithArg[] =    {PUSH, POPR, PSHR, JMP, JA, JAE, JB,
+                                                 JBE, JE, JNE, TAG, CALL, PSHM, POPM};                                         
 
     size_t sizeOfArrOfComWithoutArg  = sizeof(arrOfCommandsWithoutArg) / sizeof(arrOfCommandsWithoutArg[0]);
     size_t sizeOfArrOfComWithArg  =    sizeof(arrOfCommandsWithArg) / sizeof(arrOfCommandsWithArg[0]);
