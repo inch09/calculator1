@@ -35,7 +35,7 @@ int fillCodeArr(Processor* processor, const char* fileWithCode);
 void processorDestroy(Processor* processor);
 //----------------------------------------------------------------------------------
 void processorDump(Processor* processor, const char* processorLogFile);
-bool isCommandHaveArgument(int typeOfOperation, TypeOfOperation* oper);
+bool isCommandHaveArgument(char typeOfOperation, TypeOfOperation* oper);
 void getStringEnum(TypeOfOperation* typeOfOperation, const char** strOp);
 void printValuesOfRegisters(Processor* processor, FILE* prLogFile);
 void printRam(Processor* processor, FILE* prLogFile);
@@ -46,20 +46,18 @@ void binaryOperation(Stack_t* stack, int operation);
 void unaryOperation (Stack_t* stack, int operation);
 //----------------------------------------------------------------------------------
 ActionWithProcess processOperation(Processor* processor, Stack_t* stack);
-ActionWithProcess processUnOp(Processor* processor, Stack_t* stack, int typeOfOperation);
-ActionWithProcess processBinOp(Processor* processor, Stack_t* stack, int typeOfOperation);
-ActionWithProcess processHlt(int typeofOperation);
-ActionWithProcess processDraw(Processor* processor, int typeOfOperation);
-ActionWithProcess processCallAndRet(Processor* processor, int typeOfOperation);
-ActionWithProcess processTag(Processor* processor, int typeOfOperation);
-ActionWithProcess processInOutFunc(Processor* processor, Stack_t* stack, int typeOfOperation);
-ActionWithProcess processJump(int typeOfOperation, Stack_t* stack, Processor* processor);
-ActionWithProcess processPoprsAndPushes(Processor* processor, Stack_t* stack, int typeOfOperation);
+ActionWithProcess processUnOp(Processor* processor, Stack_t* stack, char typeOfOperation);
+ActionWithProcess processBinOp(Processor* processor, Stack_t* stack, char typeOfOperation);
+ActionWithProcess processHlt(char typeofOperation);
+ActionWithProcess processDraw(Processor* processor, char typeOfOperation);
+ActionWithProcess processCallAndRet(Processor* processor, char typeOfOperation);
+ActionWithProcess processTag(Processor* processor, char typeOfOperation);
+ActionWithProcess processInOutFunc(Processor* processor, Stack_t* stack, char typeOfOperation);
+ActionWithProcess processJump(char typeOfOperation, Stack_t* stack, Processor* processor);
+ActionWithProcess processPoprsAndPushes(Processor* processor, Stack_t* stack, char typeOfOperation);
 //----------------------------------------------------------------------------------
-void processPshr(int argument, Processor* processor, Stack_t* stack);
-void processPopr(int argument, Processor* processor, Stack_t* stack);
-void processPshm(int argument, Processor* processor, Stack_t* stack);
-void processPopm(int argument, Processor* processor, Stack_t* stack);
+void processPush(Processor* processor, Stack_t* stack, char typeOfOperation);
+void processPop(Processor* processor, Stack_t* stack, char typeOfOperation);
 //----------------------------------------------------------------------------------
 void drawSquareRam(Processor* processor);
 void deleteLastEnter(char* str);
@@ -78,9 +76,9 @@ int main(){
     assert(filePtr);
 
     while(true){
-        //processorDump(&processor, PROCESSOR_LOG_FILE);
-        //stackDump("stack.log", &stack);
-        //getchar();
+        processorDump(&processor, PROCESSOR_LOG_FILE);
+        stackDump("stack.log", &stack);
+        getchar();
         ActionWithProcess action = processOperation(&processor, &stack);
         if(action == COMPLETION){
             DUMP;
@@ -159,7 +157,8 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
     assert(processor);
 
 
-    int typeOfOperation = processor->code[processor->indOfOper];
+    char typeOfOperation = (((char) processor->code[processor->indOfOper]) << 3) >> 3;
+    printf("%d\n", typeOfOperation);//smotrim tolko pyat razrydov
 
         ActionWithProcess act = DEFAULT_ACT;
         act = processJump(typeOfOperation, stack, processor);
@@ -358,7 +357,7 @@ void deleteLastEnter(char* str){
     }
 }
 //----------------------------------------------------------------------------------
-ActionWithProcess processJump(int typeOfOperation, Stack_t* stack, Processor* processor){
+ActionWithProcess processJump(char typeOfOperation, Stack_t* stack, Processor* processor){
 
     assert(stack);
     assert(processor);
@@ -450,20 +449,14 @@ void drawSquareRam(Processor* processor){
     }
 }
 //----------------------------------------------------------------------------------
-ActionWithProcess processPoprsAndPushes(Processor* processor, Stack_t* stack, int typeOfOperation){
+ActionWithProcess processPoprsAndPushes(Processor* processor, Stack_t* stack, char typeOfOperation){
     assert(processor);
     assert(stack);
 
     switch(typeOfOperation){
-        case PUSH: stackPush(stack, processor->code[processor->indOfOper + 1]);
+        case PUSH: processPush(processor, stack, typeOfOperation);
             break;
-        case POPR: processPopr(processor->code[processor->indOfOper + 1], processor, stack);
-            break;
-        case PSHR: processPshr(processor->code[processor->indOfOper + 1], processor, stack);
-            break;
-        case POPM: processPopm(processor->code[processor->indOfOper + 1], processor, stack);
-            break;
-        case PSHM: processPshm(processor->code[processor->indOfOper + 1], processor, stack);
+        case POP:   processPop(processor, stack, typeOfOperation);
             break;
         default: return DEFAULT_ACT;
     }
@@ -472,7 +465,7 @@ ActionWithProcess processPoprsAndPushes(Processor* processor, Stack_t* stack, in
     return CONTINUATION;
 }
 //-----------------------------------------------------------------------------------------
-ActionWithProcess processInOutFunc(Processor* processor, Stack_t* stack, int typeOfOperation){
+ActionWithProcess processInOutFunc(Processor* processor, Stack_t* stack, char typeOfOperation){
     assert(processor);
     assert(stack);
 
@@ -502,7 +495,7 @@ ActionWithProcess processInOutFunc(Processor* processor, Stack_t* stack, int typ
     } 
 }
 //------------------------------------------------------------------------------------------------
-ActionWithProcess processTag(Processor* processor, int typeOfOperation){
+ActionWithProcess processTag(Processor* processor, char typeOfOperation){
     assert(processor);
     if(typeOfOperation == TAG){
         processor->indOfOper += 2;
@@ -513,7 +506,7 @@ ActionWithProcess processTag(Processor* processor, int typeOfOperation){
     }
 }
 //------------------------------------------------------------------------------------------------
-ActionWithProcess processCallAndRet(Processor* processor, int typeOfOperation){
+ActionWithProcess processCallAndRet(Processor* processor, char typeOfOperation){
     assert(processor);
     if(typeOfOperation == CALL){
         stackPush(&processor->stackOfRetTags, processor->indOfOper + 2);
@@ -529,7 +522,7 @@ ActionWithProcess processCallAndRet(Processor* processor, int typeOfOperation){
     }  
 }
 //------------------------------------------------------------------------------------------------
-ActionWithProcess processDraw(Processor* processor, int typeOfOperation){
+ActionWithProcess processDraw(Processor* processor, char typeOfOperation){
     assert(processor);
     if(typeOfOperation == DRAW){
         drawSquareRam(processor);
@@ -541,7 +534,7 @@ ActionWithProcess processDraw(Processor* processor, int typeOfOperation){
     }    
 }
 //------------------------------------------------------------------------------------------------
-ActionWithProcess processHlt(int typeofOperation){
+ActionWithProcess processHlt(char typeofOperation){
     if(typeofOperation == HLT){
         return COMPLETION;
     }
@@ -550,7 +543,7 @@ ActionWithProcess processHlt(int typeofOperation){
     }
 }
 //------------------------------------------------------------------------------------------------
-ActionWithProcess processBinOp(Processor* processor, Stack_t* stack, int typeOfOperation){
+ActionWithProcess processBinOp(Processor* processor, Stack_t* stack, char typeOfOperation){
     assert(processor);
     assert(stack);
     if(typeOfOperation == ADD || typeOfOperation == SUB ||
@@ -564,7 +557,7 @@ ActionWithProcess processBinOp(Processor* processor, Stack_t* stack, int typeOfO
     }
 }
 //------------------------------------------------------------------------------------------------
-ActionWithProcess processUnOp(Processor* processor, Stack_t* stack, int typeOfOperation){
+ActionWithProcess processUnOp(Processor* processor, Stack_t* stack, char typeOfOperation){
     assert(processor);
     assert(stack);
     if(typeOfOperation == SIN || typeOfOperation == SQRT){
@@ -661,14 +654,14 @@ void printCode(Processor* processor, FILE* prLogFile){
 
 }
 //-----------------------------------------------------------------------------------------------
-bool isCommandHaveArgument(int typeOfOperation, TypeOfOperation* oper){
+bool isCommandHaveArgument(char typeOfOperation, TypeOfOperation* oper){
     assert(oper);
 
     TypeOfOperation arrOfCommandsWithoutArg[] = {ADD, SUB, DIV, MUL, SIN, SQRT, 
                                                  IN, RET, DRAW, OUT, HLT, DEFAULT, ERROR}; 
     
-    TypeOfOperation arrOfCommandsWithArg[] =    {PUSH, POPR, PSHR, JMP, JA, JAE, JB,
-                                                 JBE, JE, JNE, TAG, CALL, PSHM, POPM};                                         
+    TypeOfOperation arrOfCommandsWithArg[] =    {PUSH, JMP, JA, JAE, JB,
+                                                 JBE, JE, JNE, TAG, CALL};                                         
 
     size_t sizeOfArrOfComWithoutArg  = sizeof(arrOfCommandsWithoutArg) / sizeof(arrOfCommandsWithoutArg[0]);
     size_t sizeOfArrOfComWithArg  =    sizeof(arrOfCommandsWithArg) / sizeof(arrOfCommandsWithArg[0]);
@@ -708,8 +701,6 @@ void getStringEnum(TypeOfOperation* typeOfOperation, const char** strOp){
             GET_OPERATION(MUL);
             GET_OPERATION(SIN);
             GET_OPERATION(SQRT);
-            GET_OPERATION(POPR);
-            GET_OPERATION(PSHR);
             GET_OPERATION(JMP);
             GET_OPERATION(JA);
             GET_OPERATION(JAE);
@@ -732,3 +723,45 @@ void getStringEnum(TypeOfOperation* typeOfOperation, const char** strOp){
 }
 
 #undef GET_OPERATION
+//-----------------------------------------------------------------------------------------------
+void processPush(Processor* processor, Stack_t* stack, char typeOfOperation){
+    printf("%d", processor->code[processor->indOfOper]);
+    if(typeOfOperation == (processor->code[processor->indOfOper] - 32)){
+        stackPush(stack, processor->code[processor->indOfOper + 1]);
+    }
+    else if(typeOfOperation == (processor->code[processor->indOfOper] - 64)){
+        int argument = processor->code[processor->indOfOper + 1];
+             if(isEqual(argument, 1)) stackPush(stack, processor->registers[0]);
+        else if(isEqual(argument, 2)) stackPush(stack, processor->registers[1]);
+        else if(isEqual(argument, 3)) stackPush(stack, processor->registers[2]);
+        else if(isEqual(argument, 4)) stackPush(stack, processor->registers[3]);
+    }
+    else if(typeOfOperation == (processor->code[processor->indOfOper] - 128)){
+        int argument = processor->code[processor->indOfOper + 1];
+             if(isEqual(argument, 1)) stackPush(stack, processor->ram[processor->registers[0]]);
+        else if(isEqual(argument, 2)) stackPush(stack, processor->ram[processor->registers[1]]);
+        else if(isEqual(argument, 3)) stackPush(stack, processor->ram[processor->registers[2]]);
+        else if(isEqual(argument, 4)) stackPush(stack, processor->ram[processor->registers[3]]);
+
+
+    }
+}
+//-----------------------------------------------------------------------------------------------
+void processPop(Processor* processor, Stack_t* stack, char typeOfOperation){
+    printf("67\n");
+    if(typeOfOperation == (processor->code[processor->indOfOper] - 64)){
+        printf("67\n");
+        int argument = processor->code[processor->indOfOper + 1];
+             if(isEqual(argument, 1)) processor->registers[0] = stackPop(stack);
+        else if(isEqual(argument, 2)) processor->registers[1] = stackPop(stack);
+        else if(isEqual(argument, 3)) processor->registers[2] = stackPop(stack);
+        else if(isEqual(argument, 4)) processor->registers[3] = stackPop(stack);
+    }    
+    else if(typeOfOperation == (processor->code[processor->indOfOper] - 128)){
+        int argument = processor->code[processor->indOfOper + 1];
+             if(isEqual(argument, 1)) processor->ram[processor->registers[0]] = stackPop(stack);
+        else if(isEqual(argument, 2)) processor->ram[processor->registers[1]] = stackPop(stack);
+        else if(isEqual(argument, 3)) processor->ram[processor->registers[2]] = stackPop(stack);
+        else if(isEqual(argument, 4)) processor->ram[processor->registers[3]] = stackPop(stack);
+    }
+}    

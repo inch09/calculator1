@@ -19,7 +19,7 @@ struct Tag{
 void firstAssemPass(FILE* fileIn, Tag* arrOfTags);
 void secondAssemPass(FILE* fileIn, FILE* fileOut, Tag* arrOfTags);
 
-void processOperWithArg(const char* stringOper, int* argument, char* operation);
+void processOperWithArg(const char* stringOper, int* argument, char* operation, int* typeOfOper);
 
 void deleteLastEnter(char* str);
 
@@ -32,11 +32,14 @@ bool strIsWithoutOperations(const char* str);
 void getNameOfTag(const char* operationWithTag, char* nameOfTag);
 int getIndOfTagByName(Tag* arrOfTags, const char* nameTag);
 
+void assembleCommandWithBranches(const char* stringOper, int* argument, char* operation, int* typeOfOper);
 void assembleJumps(const char* operation, int* argument, TypeOfOperation* typeOp, Tag* arrOfTags, char* operStr);
 void assembleFuncWithoutJmp(const char* operation, TypeOfOperation* codeOfOp);
 void assembleTag(int* argument, TypeOfOperation* codeOfOp, const char* str, Tag* arrOfTags);
+void assemblePushAndPop(const char* stringArg, int* typeOfOper, int* argument);
+bool isCommandWithBranches(const char* operation);
 
-void printComandInFile(int countWord, int argument, TypeOfOperation* codeOfOp, FILE* fileOut);
+void printComandInFile(int countWord, int argument, int* codeOfOp, FILE* fileOut);
 //-------------------------------------------------------------------------
 int main(int argc, char* argv[]){
     char fileToTrans[30] = "";
@@ -72,7 +75,95 @@ int main(int argc, char* argv[]){
     //     printf("%d ", arrOfTags[i]);
     // }
 }
+//-------------------------------------------------------------------------
+void firstAssemPass(FILE* fileIn, Tag* arrOfTags){
+    assert(fileIn);
+    assert(arrOfTags);
 
+    int indOfOperInCode = 0;
+    int indOfTag = 0;
+
+    while(true){
+
+        const int maxLengthOfStrWithOper = 30; 
+        char str[maxLengthOfStrWithOper] = {};
+        char* strptr = fgets(str, sizeof(str), fileIn);
+        if(strptr == NULL){
+            indOfOperInCode = 0;
+            break;
+        }
+        deleteLastEnter(str);
+
+        if(strIsWithoutOperations(str)){
+            continue;
+        }
+
+        if(str[0] == ':'){//func with tag
+            getNameOfTag(str, arrOfTags[indOfTag].name);
+            arrOfTags[indOfTag].indOfOper = indOfOperInCode + 2;  
+            indOfOperInCode += 2;
+            indOfTag++;
+            continue;      
+        }
+
+        size_t countWord = countOfWords((const char*) str);
+        if(countWord == 1){
+            indOfOperInCode++;
+        }
+        else if(countWord == 2){
+            indOfOperInCode += 2;
+        }
+    }
+}
+//-------------------------------------------------------------------------
+void secondAssemPass(FILE* fileIn, FILE* fileOut, Tag* arrOfTags){
+    assert(fileIn);
+    assert(fileOut);
+    assert(arrOfTags);
+
+    int indOfOper = 0;
+       
+    while(true){
+        const int maxLengthOfStrWithOper = 30; 
+        char str[maxLengthOfStrWithOper] = {};
+        char* strptr = fgets(str, sizeof(str), fileIn);
+        if(strptr == NULL){
+            indOfOper = 0;
+            break;
+        }
+        deleteLastEnter(str);
+
+        if(strIsWithoutOperations(str)){
+            continue;
+        }
+
+        const int maxLengthOfOper = 31;
+        char operation[maxLengthOfOper] = {};
+        int argument = 0;
+        int typeOfOp = 0;
+        TypeOfOperation codeOfOperation = DEFAULT;
+        
+        size_t countWord = countOfWords(str);
+        printf("str = %s, countword = %d\n", str, countWord);
+        if(countWord == 1){
+            sscanf(str, "%s", operation);
+        }
+        else if(countWord == 2){
+            processOperWithArg(str, &argument, operation, &typeOfOp);
+        }
+
+        assembleJumps(operation, &argument, &codeOfOperation, arrOfTags, str);
+        assembleFuncWithoutJmp(operation, &codeOfOperation);
+        assembleTag(&argument, &codeOfOperation, str, arrOfTags);
+
+        if(codeOfOperation != DEFAULT){
+            typeOfOp = codeOfOperation;
+        }
+        printComandInFile(countWord, argument, &typeOfOp, fileOut);
+
+        indOfOper++;
+    }
+}
 //-------------------------------------------------------------------------
 void deleteLastEnter(char* str){
     size_t lenOfStr = strlen(str);
@@ -174,95 +265,6 @@ void getNameOfTag(const char* operationWithTag, char* nameOfTag){
     }
 }
 //-------------------------------------------------------------------------
-void firstAssemPass(FILE* fileIn, Tag* arrOfTags){
-    assert(fileIn);
-    assert(arrOfTags);
-
-    int indOfOperInCode = 0;
-    int indOfTag = 0;
-
-    while(true){
-
-        const int maxLengthOfStrWithOper = 30; 
-        char str[maxLengthOfStrWithOper] = {};
-        char* strptr = fgets(str, sizeof(str), fileIn);
-        if(strptr == NULL){
-            indOfOperInCode = 0;
-            break;
-        }
-        deleteLastEnter(str);
-
-        if(strIsWithoutOperations(str)){
-            continue;
-        }
-
-        // int argument = 0;
-
-        if(str[0] == ':'){//func with tag
-            getNameOfTag(str, arrOfTags[indOfTag].name);
-            arrOfTags[indOfTag].indOfOper = indOfOperInCode + 2;  
-            indOfOperInCode += 2;
-            indOfTag++;
-            continue;      
-        }
-
-        size_t countWord = countOfWords((const char*) str);
-        if(countWord == 1){
-            indOfOperInCode++;
-        }
-        else if(countWord == 2){
-            indOfOperInCode += 2;
-        }
-    }
-}
-//-------------------------------------------------------------------------
-void secondAssemPass(FILE* fileIn, FILE* fileOut, Tag* arrOfTags){
-    assert(fileIn);
-    assert(fileOut);
-    assert(arrOfTags);
-
-    int indOfOper = 0;
-       
-    while(true){
-        const int maxLengthOfStrWithOper = 30; 
-        char str[maxLengthOfStrWithOper] = {};
-        char* strptr = fgets(str, sizeof(str), fileIn);
-        if(strptr == NULL){
-            indOfOper = 0;
-            break;
-        }
-        deleteLastEnter(str);
-
-        if(strIsWithoutOperations(str)){
-            continue;
-        }
-
-        const int maxLengthOfOper = 31;
-        char operation[maxLengthOfOper] = {};
-        int argument = 0;
-        TypeOfOperation codeOfOperation = DEFAULT;
-        
-        size_t countWord = countOfWords(str);
-        printf("str = %s, countword = %d\n", str, countWord);
-        if(countWord == 1){
-           // printf("beforeScanf = <%s>\n", str);
-            sscanf(str, "%s", operation);
-            //printf("afterScanf = <%s>\n", str);
-        }
-        else if(countWord == 2){
-            processOperWithArg(str, &argument, operation);
-        }
-
-        assembleJumps(operation, &argument, &codeOfOperation, arrOfTags, str);
-        assembleFuncWithoutJmp(operation, &codeOfOperation);
-        assembleTag(&argument, &codeOfOperation, str, arrOfTags);
-
-        printComandInFile(countWord, argument, &codeOfOperation, fileOut);
-
-        indOfOper++;
-    }
-}
-//-------------------------------------------------------------------------
 void assembleJumps(const char* operation, int* argument, TypeOfOperation* typeOp, Tag* arrOfTags, char* operStr){
     assert(operation);
     assert(argument);
@@ -342,18 +344,18 @@ void assembleFuncWithoutJmp(const char* operation, TypeOfOperation* codeOfOp){
         else if(strcmp(operation, "SQRT") == 0){
             *codeOfOp = SQRT;
         }
-        else if(strcmp(operation, "POPR") == 0){
-            *codeOfOp = POPR;
-        }
-        else if(strcmp(operation, "PSHR") == 0){
-            *codeOfOp = PSHR;
-        }
-        else if(strcmp(operation, "POPM") == 0){
-            *codeOfOp = POPM;
-        }
-        else if(strcmp(operation, "PSHM") == 0){
-            *codeOfOp = PSHM;
-        }
+        // else if(strcmp(operation, "POPR") == 0){
+        //     *codeOfOp = POPR;
+        // }
+        // // else if(strcmp(operation, "PSHR") == 0){
+        // //     *codeOfOp = PSHR;
+        // // }
+        // else if(strcmp(operation, "POPM") == 0){
+        //     *codeOfOp = POPM;
+        // }
+        // else if(strcmp(operation, "PSHM") == 0){
+        //     *codeOfOp = PSHM;
+        // }
         else if(strcmp(operation, "DRAW") == 0){
             *codeOfOp = DRAW;
         }
@@ -394,7 +396,7 @@ void assembleTag(int* argument, TypeOfOperation* codeOfOp, const char* str, Tag*
     }
 }
 //-------------------------------------------------------------------------
-void printComandInFile(int countWord, int argument, TypeOfOperation* codeOfOp, FILE* fileOut){
+void printComandInFile(int countWord, int argument, int* codeOfOp, FILE* fileOut){
     assert(fileOut);
     assert(codeOfOp);
     
@@ -416,7 +418,7 @@ void printComandInFile(int countWord, int argument, TypeOfOperation* codeOfOp, F
     fprintf(fileOut, "\n");
 }
 //-------------------------------------------------------------------------
-void processOperWithArg(const char* stringOper, int* argument, char* operation){
+void processOperWithArg(const char* stringOper, int* argument, char* operation, int* typeOfOper){
     assert(stringOper);
     assert(argument);
     assert(operation);
@@ -425,26 +427,9 @@ void processOperWithArg(const char* stringOper, int* argument, char* operation){
 
     sscanf(stringOper, "%s %s", operation, stringArg);
 
-
-    if(!strIsNumber(stringArg)){  
-        if(strcmp(stringArg, "AX") == 0 ||
-           strcmp(stringArg, "[AX]") == 0){
-            *argument = 1;
-        }
-        else if(strcmp(stringArg, "BX") == 0 ||
-                strcmp(stringArg, "[BX]") == 0){
-            *argument = 2;
-        }
-        else if(strcmp(stringArg, "CX") == 0 ||
-                strcmp(stringArg, "[CX]") == 0){
-            *argument = 3;
-        }
-        else if(strcmp(stringArg, "DX") == 0 ||
-                strcmp(stringArg, "[DX]") == 0){
-            *argument = 4;
-        }
+    if(isCommandWithBranches(operation)){
+        assembleCommandWithBranches(stringOper, argument, operation, typeOfOper);
     }
-
     else{
         sscanf(stringOper, "%s %d", operation, argument);
     }
@@ -479,5 +464,96 @@ int getIndOfTagByName(Tag* arrOfTags, const char* nameTag){
     }
     //printf("ind = %d\n", indOfTag);
     return indOfTag;
+}
+//-------------------------------------------------------------------------------
+// void processPushes(const char* operation, const char* stringArg){
+//     assert(operation);
+//     assert(stringArg);
+    
+//     if(strcmp(stringArg, "AX") == 0 ||
+//         strcmp(stringArg, "[AX]") == 0){
+//         *argument = 1;
+//     }
+//     else if(strcmp(stringArg, "BX") == 0 ||
+//             strcmp(stringArg, "[BX]") == 0){
+//         *argument = 2;
+//     }
+//     else if(strcmp(stringArg, "CX") == 0 ||
+//             strcmp(stringArg, "[CX]") == 0){
+//         *argument = 3;
+//     }
+//     else if(strcmp(stringArg, "DX") == 0 ||
+//             strcmp(stringArg, "[DX]") == 0){
+//         *argument = 4;
+//     }
+// }
+
+// void processPops(const char* operation){
+
+// }
+//-------------------------------------------------------------------------------
+bool isCommandWithBranches(const char* operation){
+    assert(operation);
+
+    if(strcmp(operation, "PUSH") == 0) return true;
+    if(strcmp(operation,  "POP") == 0) return true;
+    
+    return false;
+}
+//-------------------------------------------------------------------------------
+void assembleCommandWithBranches(const char* stringOper, int* argument, char* operation, int* typeOfOper){
+    assert(stringOper);
+    assert(argument);
+    assert(operation);
+
+    char stringArg[30] = {};
+    sscanf(stringOper, "%s %s", operation, stringArg);
+
+    if(strcmp(operation, "PUSH") == 0){
+        *typeOfOper = PUSH;
+        assemblePushAndPop(stringArg, typeOfOper, argument);
+    }
+    else if(strcmp(operation, "POP") == 0){
+        *typeOfOper = POP;
+        assemblePushAndPop(stringArg, typeOfOper, argument);
+    }
+
+    return;
+
+}
+//-------------------------------------------------------------------------------
+void assemblePushAndPop(const char* stringArg, int* typeOfOper, int* argument){
+    assert(stringArg);
+    assert(typeOfOper);
+    assert(argument);
+
+    char registers[][5] = {"AX", "BX", "CX", "DX"};
+    char memoryPush[][10] = {"[AX]", "[BX]", "[CX]", "[DX]"};
+
+    if(strIsNumber(stringArg)){
+        sscanf(stringArg, "%d", argument);
+        *typeOfOper += 32; // 00100000
+        return;
+    }
+
+    size_t regSize = sizeof(registers)/sizeof(registers[0]);
+    for(size_t i = 0; i < regSize; i++){
+        if(strcmp(stringArg, registers[i]) == 0){
+            *argument = i + 1;
+            *typeOfOper += 64; //01000000
+            return;
+        }
+    }
+
+    size_t memoryPushSize = sizeof(memoryPush)/sizeof(memoryPush[0]);
+    for(size_t i = 0; i < memoryPushSize; i++){
+        if(strcmp(stringArg, memoryPush[i]) == 0){
+            *argument = i + 1;
+            *typeOfOper += 128; //10000000
+            return;
+        }
+    }
+
+    return;
 }
 
