@@ -323,10 +323,7 @@ void assembleFuncWithoutJmp(const char* operation, TypeOfOperation* codeOfOp){
     assert(operation);
     assert(codeOfOp);
 
-        if(strcmp(operation, "PUSH") == 0){
-            *codeOfOp = PUSH;
-        }
-        else if(strcmp(operation, "ADD") == 0){
+        if(strcmp(operation, "ADD") == 0){
             *codeOfOp = ADD;
         }
         else if(strcmp(operation, "SUB") == 0){

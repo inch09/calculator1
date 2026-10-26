@@ -3,7 +3,7 @@
 #include "operations.h"
 
 enum TypeOfOperation{
-     PUSH = 27,
+     PUSH = 0,
       ADD = 1,
       SUB = 2,
       DIV = 3,
