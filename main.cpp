@@ -631,7 +631,7 @@ void printCode(Processor* processor, FILE* prLogFile){
         int increase = 0;
         const char* strOperation = "";
         fprintf(prLogFile, "%d. ", numOfCommand);
-        if(isCommandHaveArgument(processor->code[i], &oper)){
+        if(isCommandHaveArgument(((char) processor->code[i]) & 31, &oper)){
             fprintf(prLogFile, "%d ", processor->code[i]);
             fprintf(prLogFile, "%d", processor->code[i + 1]);
             increase = 1;
@@ -645,7 +645,7 @@ void printCode(Processor* processor, FILE* prLogFile){
         if(i == processor->indOfOper){
             fprintf(prLogFile, "  <----- ");
             fprintf(prLogFile, "%s", strOperation);
-            if(isCommandHaveArgument(processor->code[i], &oper)){
+            if(isCommandHaveArgument(((char) processor->code[i]) & 31, &oper)){
                 fprintf(prLogFile, " %d", processor->code[i + 1]);
             }
         }
@@ -663,7 +663,7 @@ bool isCommandHaveArgument(char typeOfOperation, TypeOfOperation* oper){
     TypeOfOperation arrOfCommandsWithoutArg[] = {ADD, SUB, DIV, MUL, SIN, SQRT, 
                                                  IN, RET, DRAW, OUT, HLT, DEFAULT, ERROR}; 
     
-    TypeOfOperation arrOfCommandsWithArg[] =    {PUSH, JMP, JA, JAE, JB,
+    TypeOfOperation arrOfCommandsWithArg[] =    {PUSH, JMP, JA, JAE, JB, POP,
                                                  JBE, JE, JNE, TAG, CALL};                                         
 
     size_t sizeOfArrOfComWithoutArg  = sizeof(arrOfCommandsWithoutArg) / sizeof(arrOfCommandsWithoutArg[0]);
@@ -696,8 +696,11 @@ void getStringEnum(TypeOfOperation* typeOfOperation, const char** strOp){
     assert(strOp);
     assert(*strOp);
 
+    char codeOfOper = ((char)(*typeOfOperation)) & 31;
+
      switch(*typeOfOperation){        
             GET_OPERATION(PUSH);
+            GET_OPERATION(POP);
             GET_OPERATION(ADD);
             GET_OPERATION(SUB);
             GET_OPERATION(DIV);
