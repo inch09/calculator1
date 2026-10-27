@@ -166,6 +166,7 @@ void secondAssemPass(FILE* fileIn, FILE* fileOut, Tag* arrOfTags){
 }
 //-------------------------------------------------------------------------
 void deleteLastEnter(char* str){
+    assert(str);
     size_t lenOfStr = strlen(str);
     if (str[lenOfStr - 1] == '\n'){
         str[lenOfStr- 1] = '\0';
@@ -173,6 +174,7 @@ void deleteLastEnter(char* str){
 }
 //-------------------------------------------------------------------------
 size_t countOfWords(const char* str){
+    assert(str);
     size_t count = 0;
     if((str[0] != ' ') && (str[0] != '\n') && (str[0] != '\0')){
         count++;
@@ -254,6 +256,7 @@ void strCpyWithSameLength(char* strCopyTo, char* strCopyFrom){
 //-------------------------------------------------------------------------
 void getNameOfTag(const char* operationWithTag, char* nameOfTag){
     assert(operationWithTag);
+    assert(nameOfTag);
 
     size_t operationWithTagLen = strlen(operationWithTag);
     printf("oper withTag = %s, len = %d\n", operationWithTag, operationWithTagLen);
@@ -372,6 +375,7 @@ void assembleTag(int* argument, TypeOfOperation* codeOfOp, const char* str, Tag*
     assert(argument);
     assert(codeOfOp);
     assert(str);
+    assert(arrOfTags);
 
     printf("str = %s\n", str);
     
