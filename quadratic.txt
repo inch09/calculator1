@@ -1,15 +1,15 @@
 IN
 PUSH 1000
 MUL
-POPR AX
+POP AX
 IN
 PUSH 1000
 MUL
-POPR BX
+POP BX
 IN
 PUSH 1000
 MUL
-POPR CX
+POP CX
 
 CALL check_ax
 
@@ -18,23 +18,23 @@ HLT
 
 
 :calc_disc
-PSHR BX
-PSHR BX
+PUSH BX
+PUSH BX
 MUL
 PUSH 4
-PSHR AX
-PSHR CX
+PUSH AX
+PUSH CX
 MUL
 MUL
 SUB
-POPR DX
+POP DX
 RET
 
 :process_disc_val
-PSHR DX
+PUSH DX
 PUSH 0
 JA calc_two_solves
-PSHR DX
+PUSH DX
 PUSH 0
 JE calc_one_solve
 JMP zero_sol
@@ -42,29 +42,29 @@ OUT
 RET
 
 :calc_two_solves
-PSHR BX
+PUSH BX
 PUSH -1
 MUL
-PSHR DX
+PUSH DX
 SQRT
 SUB
 PUSH 1000
 MUL
 PUSH 2
-PSHR AX
+PUSH AX
 MUL
 DIV
 OUT
-PSHR BX
+PUSH BX
 PUSH -1
 MUL
-PSHR DX
+PUSH DX
 SQRT
 ADD
 PUSH 1000
 MUL
 PUSH 2
-PSHR AX
+PUSH AX
 MUL
 DIV
 OUT
@@ -72,13 +72,13 @@ JMP end_prog
 RET
 
 :calc_one_solve
-PSHR BX
+PUSH BX
 PUSH -1
 MUL
 PUSH 1000
 MUL
 PUSH 2
-PSHR AX
+PUSH AX
 MUL
 DIV
 OUT
@@ -86,19 +86,19 @@ JMP end_prog
 RET
 
 :calc_linear_eq
-PSHR CX
+PUSH CX
 PUSH -1
 MUL
 PUSH 1000
 MUL
-PSHR BX
+PUSH BX
 DIV
 OUT
 JMP end_prog
 RET
 
 :check_ax
-PSHR AX
+PUSH AX
 PUSH 0
 JE check_bx
 CALL calc_disc
@@ -106,14 +106,14 @@ CALL process_disc_val
 RET
 
 :check_bx
-PSHR BX
+PUSH BX
 PUSH 0
 JE check_cx
 CALL calc_linear_eq
 RET
 
 :check_cx
-PSHR CX
+PUSH CX
 PUSH 0
 JE inf_solves
 JMP zero_sol

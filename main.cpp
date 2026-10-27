@@ -76,9 +76,9 @@ int main(){
     assert(filePtr);
 
     while(true){
-        processorDump(&processor, PROCESSOR_LOG_FILE);
-        stackDump("stack.log", &stack);
-        getchar();
+        //processorDump(&processor, PROCESSOR_LOG_FILE);
+        //stackDump("stack.log", &stack);
+        //getchar();
         ActionWithProcess action = processOperation(&processor, &stack);
         if(action == COMPLETION){
             DUMP;
@@ -157,8 +157,11 @@ ActionWithProcess processOperation(Processor* processor, Stack_t* stack){
     assert(processor);
 
 
-    char typeOfOperation = (((char) processor->code[processor->indOfOper]) << 3) >> 3;
-    printf("%d\n", typeOfOperation);//smotrim tolko pyat razrydov
+    char typeOfOperation = (((char) processor->code[processor->indOfOper]) & 31/*00011111*/);
+    // char check = (32 & 31);
+    //printf("%d\n", processor->code[processor->indOfOper]);
+    //printf("%d\n", typeOfOperation);//smotrim tolko pyat razrydov
+    // printf("%d\n", check);
 
         ActionWithProcess act = DEFAULT_ACT;
         act = processJump(typeOfOperation, stack, processor);
@@ -725,18 +728,18 @@ void getStringEnum(TypeOfOperation* typeOfOperation, const char** strOp){
 #undef GET_OPERATION
 //-----------------------------------------------------------------------------------------------
 void processPush(Processor* processor, Stack_t* stack, char typeOfOperation){
-    printf("%d", processor->code[processor->indOfOper]);
-    if(typeOfOperation == (processor->code[processor->indOfOper] - 32)){
+    //printf("%d", processor->code[processor->indOfOper]);
+    if(typeOfOperation == (processor->code[processor->indOfOper] - 32/*00100000*/)){
         stackPush(stack, processor->code[processor->indOfOper + 1]);
     }
-    else if(typeOfOperation == (processor->code[processor->indOfOper] - 64)){
+    else if(typeOfOperation == (processor->code[processor->indOfOper] - 64/*01000000*/)){
         int argument = processor->code[processor->indOfOper + 1];
              if(isEqual(argument, 1)) stackPush(stack, processor->registers[0]);
         else if(isEqual(argument, 2)) stackPush(stack, processor->registers[1]);
         else if(isEqual(argument, 3)) stackPush(stack, processor->registers[2]);
         else if(isEqual(argument, 4)) stackPush(stack, processor->registers[3]);
     }
-    else if(typeOfOperation == (processor->code[processor->indOfOper] - 128)){
+    else if(typeOfOperation == (processor->code[processor->indOfOper] - 128/*10000000*/)){
         int argument = processor->code[processor->indOfOper + 1];
              if(isEqual(argument, 1)) stackPush(stack, processor->ram[processor->registers[0]]);
         else if(isEqual(argument, 2)) stackPush(stack, processor->ram[processor->registers[1]]);
@@ -748,16 +751,16 @@ void processPush(Processor* processor, Stack_t* stack, char typeOfOperation){
 }
 //-----------------------------------------------------------------------------------------------
 void processPop(Processor* processor, Stack_t* stack, char typeOfOperation){
-    printf("67\n");
-    if(typeOfOperation == (processor->code[processor->indOfOper] - 64)){
-        printf("67\n");
+    //printf("67\n");
+    if(typeOfOperation == (processor->code[processor->indOfOper] - 64/*01000000*/)){
+        //printf("67\n");
         int argument = processor->code[processor->indOfOper + 1];
              if(isEqual(argument, 1)) processor->registers[0] = stackPop(stack);
         else if(isEqual(argument, 2)) processor->registers[1] = stackPop(stack);
         else if(isEqual(argument, 3)) processor->registers[2] = stackPop(stack);
         else if(isEqual(argument, 4)) processor->registers[3] = stackPop(stack);
     }    
-    else if(typeOfOperation == (processor->code[processor->indOfOper] - 128)){
+    else if(typeOfOperation == (processor->code[processor->indOfOper] - 128/*10000000*/)){
         int argument = processor->code[processor->indOfOper + 1];
              if(isEqual(argument, 1)) processor->ram[processor->registers[0]] = stackPop(stack);
         else if(isEqual(argument, 2)) processor->ram[processor->registers[1]] = stackPop(stack);
