@@ -63,8 +63,10 @@ void drawSquareRam(Processor* processor);
 void deleteLastEnter(char* str);
 //----------------------------------------------------------------------------------
 
+// static zabotat
+
 int main(){
-    
+    // pragma  (хз что там писать, но посмотри)
     Processor processor = {};
     processorInit(&processor);
     fillCodeArr(&processor, FILE_WITH_CODE);
